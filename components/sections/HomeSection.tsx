@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { STATS, ROADMAP } from "@/lib/data";
 import { fetchListings, fetchMentors, ListingDoc, MentorDoc } from "@/lib/api";
 import { Badge, Avatar, StarRating, Skeleton } from "../ui";
@@ -171,7 +172,7 @@ function CombinedSearch() {
   );
 }
 
-/* ── Main ──────────────────────────────────────────────── */
+/* ── Main Home Section (Refactored) ───────────────────── */
 export default function HomeSection({
   onTabChange,
   onListingClick,
@@ -195,33 +196,58 @@ export default function HomeSection({
     });
   }, []);
 
+  // Replace these paths with the actual filenames inside your /public/images folder
+  const communityImages = [
+    "/images/img1.jpg",
+    "/images/img2.jpg",
+    "/images/img3.jpg",
+    "/images/img4.jpg",
+  ];
+
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 py-8 text-[#18181B] sm:px-6 lg:px-8">
-      {/* Use tighter vertical rhythm on mobile */}
-      <div className="mx-auto max-w-7xl space-y-10 sm:space-y-16">
-        {/* ── HERO — stack on mobile, two columns only on lg ── */}
-        <section className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
-          {/* Left: copy – full width on mobile */}
-          <div className="space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#E4E4E7] bg-white px-4 py-1.5 text-xs font-medium text-[#52525B]">
-              {/* optional badge */}
+    <div className="min-h-screen bg-[#FAFAFA] px-4 py-12 text-[#18181B] sm:px-6 sm:py-20 lg:px-8">
+      {/* Increased vertical spacing between sections */}
+      <div className="mx-auto max-w-7xl space-y-16 sm:space-y-24 lg:space-y-28">
+        
+        {/* ── HERO — mobile stacked, side-by-side from md onwards ── */}
+        <section className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 lg:gap-16">
+          {/* Left column */}
+          <div className="space-y-5 text-center md:text-left">
+            {/* Small circular avatars + social proof */}
+            <div className="flex items-center justify-center md:justify-start -space-x-2">
+              {communityImages.map((src, idx) => (
+                <div
+                  key={idx}
+                  className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-white bg-gray-100 shadow-sm overflow-hidden"
+                >
+                  <Image
+                    src={src}
+                    alt={`Community member ${idx + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 40px, 48px"
+                  />
+                </div>
+              ))}
+              <span className="text-sm text-[#52525B] ml-3">
+                100+ students joined
+              </span>
             </div>
 
-            {/* Fixed typography scale – sensible mobile sizes */}
-            <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-4xl lg:text-5xl">
-           Find Your Peers{" "}
-              <span className="text-[#18181B]">Find used books within your campus</span>
+            <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-3xl lg:text-4xl">
+              Find Your Peers{" "}
+              <span className="text-[#18181B]">And used books within your campus</span>
             </h1>
 
-            <p className="mx-auto max-w-lg text-base text-[#52525B] lg:mx-0">
+            <p className="mx-auto max-w-lg text-base text-[#52525B] md:mx-0">
               Discover affordable textbooks, connect with mentors, share notes, and unlock
               educational resources hidden within your community.
             </p>
 
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center md:justify-start">
               <button
                 onClick={() => onTabChange("marketplace")}
-                className="h-11 w-full rounded-sm bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
+                className="h-11 w-full rounded-md bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
               >
                 Browse Resources →
               </button>
@@ -235,7 +261,7 @@ export default function HomeSection({
 
             <p className="text-sm text-[#71717A]">Free to use · No sign‑up required</p>
 
-            {/* Stats grid – 2x2 on mobile, 4 columns on sm+ */}
+            {/* Stats grid – same as before */}
             <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4 sm:gap-4">
               {STATS.map((s) => (
                 <div
@@ -252,9 +278,9 @@ export default function HomeSection({
             </div>
           </div>
 
-          {/* Right: Network Viz – hidden on mobile to reduce clutter */}
-          <div className="hidden lg:flex lg:justify-end">
-            <div className="w-full max-w-md rounded-xl border border-[#E4E4E7] bg-white p-6">
+          {/* Right column – always visible from md upwards, spacious network card */}
+          <div className="flex justify-center md:justify-end">
+            <div className="w-full max-w-md rounded-xl border border-[#E4E4E7] bg-white p-6 sm:p-8">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-[#18181B]">Knowledge Network</p>
                 <Badge color="emerald">● Live</Badge>
@@ -262,7 +288,7 @@ export default function HomeSection({
               <p className="mt-1 text-sm text-[#52525B]">
                 Resources flowing through student communities
               </p>
-              <div className="mt-4">
+              <div className="mt-6">
                 <NetworkViz />
               </div>
             </div>
@@ -270,14 +296,14 @@ export default function HomeSection({
         </section>
 
         {/* ── How it works ─────────────────────────────────── */}
-        <section className="space-y-6">
+        <section className="space-y-8">
           <div className="space-y-2 text-center">
             <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">How It Works</p>
             <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
               4 steps to unlock resources
             </h2>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["📸", "Scan a Textbook", "Point camera at any book cover"],
               ["🤖", "Vision OCR Reads It", "Google Vision + Open Library fetch real metadata"],
@@ -286,17 +312,17 @@ export default function HomeSection({
             ].map(([icon, title, desc], i) => (
               <div
                 key={i}
-                className="relative rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B] sm:p-6"
+                className="relative rounded-xl border border-[#E4E4E7] bg-white p-5 transition hover:border-[#18181B] sm:p-6"
               >
                 <div className="absolute right-4 top-4 text-4xl font-black text-[#E4E4E7] select-none">
                   {String(i + 1).padStart(2, "0")}
                 </div>
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md border border-[#E4E4E7] bg-[#FAFAFA] text-lg sm:h-10 sm:w-10 sm:text-xl">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md border border-[#E4E4E7] bg-[#FAFAFA] text-xl sm:h-11 sm:w-11 sm:text-2xl">
                   {icon}
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-[#18181B]">{title}</p>
-                  <p className="mt-0.5 text-sm text-[#52525B]">{desc}</p>
+                  <p className="mt-1 text-sm text-[#52525B]">{desc}</p>
                 </div>
               </div>
             ))}
@@ -304,7 +330,7 @@ export default function HomeSection({
         </section>
 
         {/* ── Search ─────────────────────────────────────────── */}
-        <section className="space-y-4">
+        <section className="space-y-5">
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Search</p>
             <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
@@ -318,7 +344,7 @@ export default function HomeSection({
         </section>
 
         {/* ── Featured Listings ─────────────────────────────── */}
-        <section className="space-y-4">
+        <section className="space-y-6">
           <div className="flex items-end justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Marketplace</p>
@@ -331,7 +357,7 @@ export default function HomeSection({
               View all →
             </button>
           </div>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             {loadingFeatured
               ? [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 rounded-xl" />)
               : featuredListings.length === 0
@@ -347,7 +373,7 @@ export default function HomeSection({
         </section>
 
         {/* ── Top Mentors ───────────────────────────────────── */}
-        <section className="space-y-4">
+        <section className="space-y-6">
           <div className="flex items-end justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Mentorship Hub</p>
@@ -360,7 +386,7 @@ export default function HomeSection({
               View all →
             </button>
           </div>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             {loadingFeatured
               ? [1, 2].map((i) => <Skeleton key={i} className="h-48 rounded-xl" />)
               : featuredMentors.length === 0
@@ -376,8 +402,8 @@ export default function HomeSection({
         </section>
 
         {/* ── CTA Banner ────────────────────────────────────── */}
-        <section className="rounded-xl border border-[#E4E4E7] bg-white p-6 text-center sm:p-10">
-          <div className="space-y-2">
+        <section className="rounded-xl border border-[#E4E4E7] bg-white p-8 text-center sm:p-12">
+          <div className="space-y-3">
             <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Get started</p>
             <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
               Have books you no longer need?
@@ -386,7 +412,7 @@ export default function HomeSection({
               Help a student who needs them — scan, list, and share your knowledge.
             </p>
           </div>
-          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <button
               onClick={onScan}
               className="h-11 w-full rounded-md bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
@@ -402,8 +428,8 @@ export default function HomeSection({
           </div>
         </section>
 
-        {/* ── Roadmap – collapsible to save mobile space ─────── */}
-        <section className="space-y-4">
+        {/* ── Roadmap – collapsible ──────────────────────────── */}
+        <section className="space-y-6">
           <div className="space-y-2 text-center">
             <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Platform Roadmap</p>
             <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
@@ -413,13 +439,13 @@ export default function HomeSection({
           <div className="text-center">
             <button
               onClick={() => setShowRoadmap(!showRoadmap)}
-              className="inline-flex items-center gap-1 rounded-md border border-[#E4E4E7] bg-white px-4 py-2 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+              className="inline-flex items-center gap-1 rounded-md border border-[#E4E4E7] bg-white px-5 py-2.5 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
             >
               {showRoadmap ? "Hide roadmap ▲" : "View roadmap ▼"}
             </button>
           </div>
           {showRoadmap && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mt-6">
               {ROADMAP.map((r) => {
                 const statusMap: Record<string, { label: string; bg: string; text: string }> = {
                   next: { label: "Up next", bg: "bg-emerald-50", text: "text-emerald-700" },
@@ -430,7 +456,7 @@ export default function HomeSection({
                 return (
                   <div
                     key={r.title}
-                    className="flex items-start gap-3 rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B]"
+                    className="flex items-start gap-3 rounded-xl border border-[#E4E4E7] bg-white p-5 transition hover:border-[#18181B]"
                   >
                     <span className="text-2xl">{r.icon}</span>
                     <div className="flex-1">
@@ -442,7 +468,7 @@ export default function HomeSection({
                           {status.label}
                         </span>
                       </div>
-                      <p className="mt-0.5 text-sm text-[#52525B]">{r.desc}</p>
+                      <p className="mt-1 text-sm text-[#52525B]">{r.desc}</p>
                     </div>
                   </div>
                 );
@@ -452,7 +478,7 @@ export default function HomeSection({
         </section>
 
         {/* ── Footer ────────────────────────────────────────── */}
-        <footer className="border-t border-[#E4E4E7] pt-8 text-center">
+        <footer className="border-t border-[#E4E4E7] pt-10 text-center">
           <div className="flex items-center justify-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#18181B] text-sm text-white">
               📚
@@ -464,7 +490,7 @@ export default function HomeSection({
           <p className="mx-auto mt-2 max-w-xs text-sm text-[#52525B]">
             Unlocking educational resources hidden within student communities.
           </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-6">
+          <div className="mt-6 flex flex-wrap justify-center gap-6">
             {["About", "Contact", "Privacy", "Terms", "Roadmap"].map((l) => (
               <span
                 key={l}
@@ -474,7 +500,7 @@ export default function HomeSection({
               </span>
             ))}
           </div>
-          <p className="mt-6 text-xs text-[#71717A]/60">© 2025 Peer &amp; Shelf</p>
+          <p className="mt-8 text-xs text-[#71717A]/60">© 2025 Peer &amp; Shelf</p>
         </footer>
       </div>
     </div>
