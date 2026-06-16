@@ -198,10 +198,10 @@ export default function HomeSection({
 
   // Replace these paths with the actual filenames inside your /public/images folder
   const communityImages = [
-    "/images/img1.jpg",
-    "/images/img2.jpg",
-    "/images/img3.jpg",
-    "/images/img4.jpg",
+    "/images/image1.png",
+    "/images/image2.png",
+    "/images/image3.png",
+    "/images/image4.png",
   ];
 
   return (
