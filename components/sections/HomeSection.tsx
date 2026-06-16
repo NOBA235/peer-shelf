@@ -21,22 +21,27 @@ function Counter({ target }: { target: number }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const started = useRef(false);
+
   useEffect(() => {
-    const obs = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !started.current) {
-        started.current = true;
-        const t0 = Date.now();
-        const tick = () => {
-          const p = Math.min((Date.now() - t0) / 1800, 1);
-          setCount(Math.floor((1 - Math.pow(1 - p, 3)) * target));
-          if (p < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }
-    }, { threshold: 0.5 });
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !started.current) {
+          started.current = true;
+          const t0 = Date.now();
+          const tick = () => {
+            const p = Math.min((Date.now() - t0) / 1800, 1);
+            setCount(Math.floor((1 - Math.pow(1 - p, 3)) * target));
+            if (p < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.5 }
+    );
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
   }, [target]);
+
   return <span ref={ref}>{count.toLocaleString()}</span>;
 }
 
@@ -177,6 +182,7 @@ export default function HomeSection({
   const [featuredListings, setFeaturedListings] = useState<ListingDoc[]>([]);
   const [featuredMentors, setFeaturedMentors] = useState<MentorDoc[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
+  const [showRoadmap, setShowRoadmap] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -191,22 +197,23 @@ export default function HomeSection({
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] px-4 py-8 text-[#18181B] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-16">
-        {/* ── HERO — two column on large screens ────────────── */}
+      {/* Use tighter vertical rhythm on mobile */}
+      <div className="mx-auto max-w-7xl space-y-10 sm:space-y-16">
+        {/* ── HERO — stack on mobile, two columns only on lg ── */}
         <section className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
-          {/* Left: copy */}
+          {/* Left: copy – full width on mobile */}
           <div className="space-y-6 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#E4E4E7] bg-white px-4 py-1.5 text-xs font-medium text-[#52525B]">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-              Real‑time Resource Network
+              {/* optional badge */}
             </div>
 
-            <h1 className="text-[36px] font-bold leading-[44px] tracking-tight text-[#18181B] md:text-[48px] md:leading-[56px] lg:text-[48px]">
+            {/* Fixed typography scale – sensible mobile sizes */}
+            <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-4xl lg:text-5xl">
               Turn Every Student Shelf{" "}
               <span className="text-[#18181B]">Into a Knowledge Network</span>
             </h1>
 
-            <p className="text-[18px] leading-[28px] text-[#52525B] max-w-lg mx-auto lg:mx-0">
+            <p className="mx-auto max-w-lg text-base text-[#52525B] lg:mx-0">
               Discover affordable textbooks, connect with mentors, share notes, and unlock
               educational resources hidden within your community.
             </p>
@@ -214,13 +221,13 @@ export default function HomeSection({
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <button
                 onClick={() => onTabChange("marketplace")}
-                className="h-11 rounded-md bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+                className="h-11 w-full rounded-sm bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
               >
                 Browse Resources →
               </button>
               <button
                 onClick={onScan}
-                className="h-11 rounded-md border border-[#E4E4E7] bg-white px-6 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+                className="h-11 w-full rounded-md border border-[#E4E4E7] bg-white px-6 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
               >
                 📷 Scan a Book
               </button>
@@ -228,12 +235,15 @@ export default function HomeSection({
 
             <p className="text-sm text-[#71717A]">Free to use · No sign‑up required</p>
 
-            {/* Stats grid — clean, minimal */}
-            <div className="grid grid-cols-2 gap-4 pt-2 sm:grid-cols-4">
+            {/* Stats grid – 2x2 on mobile, 4 columns on sm+ */}
+            <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4 sm:gap-4">
               {STATS.map((s) => (
-                <div key={s.label} className="rounded-md border border-[#E4E4E7] bg-white p-4 text-center">
-                  <div className="mb-1 text-2xl">{s.icon}</div>
-                  <div className="text-xl font-bold text-[#18181B]">
+                <div
+                  key={s.label}
+                  className="rounded-md border border-[#E4E4E7] bg-white p-3 text-center sm:p-4"
+                >
+                  <div className="mb-1 text-xl sm:text-2xl">{s.icon}</div>
+                  <div className="text-lg font-bold text-[#18181B] sm:text-xl">
                     <Counter target={s.value} />+
                   </div>
                   <div className="text-xs text-[#71717A]">{s.label}</div>
@@ -242,14 +252,16 @@ export default function HomeSection({
             </div>
           </div>
 
-          {/* Right: Network Viz card */}
-          <div className="flex justify-center lg:justify-end">
+          {/* Right: Network Viz – hidden on mobile to reduce clutter */}
+          <div className="hidden lg:flex lg:justify-end">
             <div className="w-full max-w-md rounded-xl border border-[#E4E4E7] bg-white p-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-[#18181B]">Knowledge Network</p>
                 <Badge color="emerald">● Live</Badge>
               </div>
-              <p className="mt-1 text-sm text-[#52525B]">Resources flowing through student communities</p>
+              <p className="mt-1 text-sm text-[#52525B]">
+                Resources flowing through student communities
+              </p>
               <div className="mt-4">
                 <NetworkViz />
               </div>
@@ -261,7 +273,7 @@ export default function HomeSection({
         <section className="space-y-6">
           <div className="space-y-2 text-center">
             <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">How It Works</p>
-            <h2 className="text-[24px] font-bold leading-[32px] text-[#18181B] md:text-[30px] md:leading-[38px]">
+            <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
               4 steps to unlock resources
             </h2>
           </div>
@@ -274,12 +286,12 @@ export default function HomeSection({
             ].map(([icon, title, desc], i) => (
               <div
                 key={i}
-                className="relative rounded-xl border border-[#E4E4E7] bg-white p-6 transition hover:border-[#18181B]"
+                className="relative rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B] sm:p-6"
               >
                 <div className="absolute right-4 top-4 text-4xl font-black text-[#E4E4E7] select-none">
                   {String(i + 1).padStart(2, "0")}
                 </div>
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md border border-[#E4E4E7] bg-[#FAFAFA] text-xl">
+                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md border border-[#E4E4E7] bg-[#FAFAFA] text-lg sm:h-10 sm:w-10 sm:text-xl">
                   {icon}
                 </div>
                 <div>
@@ -295,10 +307,10 @@ export default function HomeSection({
         <section className="space-y-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Search</p>
-            <h2 className="text-[24px] font-bold leading-[32px] text-[#18181B] md:text-[30px] md:leading-[38px]">
+            <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
               Find books &amp; mentors together
             </h2>
-            <p className="mt-1 text-[16px] text-[#52525B]">
+            <p className="mt-1 text-base text-[#52525B]">
               One search across listings and mentor profiles in MongoDB.
             </p>
           </div>
@@ -310,7 +322,7 @@ export default function HomeSection({
           <div className="flex items-end justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Marketplace</p>
-              <h2 className="text-[24px] font-bold leading-[32px] text-[#18181B]">Featured Resources</h2>
+              <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">Featured Resources</h2>
             </div>
             <button
               onClick={() => onTabChange("marketplace")}
@@ -323,7 +335,7 @@ export default function HomeSection({
             {loadingFeatured
               ? [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 rounded-xl" />)
               : featuredListings.length === 0
-              ? <p className="text-sm text-[#71717A]">No listings yet — be the first to add one.</p>
+              ? <p className="text-sm text-[#71717A] col-span-full">No listings yet — be the first to add one.</p>
               : featuredListings.map((l) => (
                   <ListingCard
                     key={l._id}
@@ -339,7 +351,7 @@ export default function HomeSection({
           <div className="flex items-end justify-between">
             <div>
               <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Mentorship Hub</p>
-              <h2 className="text-[24px] font-bold leading-[32px] text-[#18181B]">Top Mentors</h2>
+              <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">Top Mentors</h2>
             </div>
             <button
               onClick={() => onTabChange("mentors")}
@@ -352,7 +364,7 @@ export default function HomeSection({
             {loadingFeatured
               ? [1, 2].map((i) => <Skeleton key={i} className="h-48 rounded-xl" />)
               : featuredMentors.length === 0
-              ? <p className="text-sm text-[#71717A]">No mentors yet.</p>
+              ? <p className="text-sm text-[#71717A] col-span-full">No mentors yet.</p>
               : featuredMentors.map((m) => (
                   <MentorCard
                     key={m._id}
@@ -364,69 +376,79 @@ export default function HomeSection({
         </section>
 
         {/* ── CTA Banner ────────────────────────────────────── */}
-        <section className="rounded-xl border border-[#E4E4E7] bg-white p-8 text-center sm:p-10">
+        <section className="rounded-xl border border-[#E4E4E7] bg-white p-6 text-center sm:p-10">
           <div className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Get started</p>
-            <h2 className="text-[24px] font-bold leading-[32px] text-[#18181B] md:text-[30px] md:leading-[38px]">
+            <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
               Have books you no longer need?
             </h2>
-            <p className="mx-auto max-w-md text-[16px] text-[#52525B]">
+            <p className="mx-auto max-w-md text-base text-[#52525B]">
               Help a student who needs them — scan, list, and share your knowledge.
             </p>
           </div>
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <button
               onClick={onScan}
-              className="h-11 rounded-md bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+              className="h-11 w-full rounded-md bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
             >
               📷 Scan &amp; List Now
             </button>
             <button
               onClick={onWishlist}
-              className="h-11 rounded-md border border-[#E4E4E7] bg-white px-6 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+              className="h-11 w-full rounded-md border border-[#E4E4E7] bg-white px-6 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
             >
               Request a Book
             </button>
           </div>
         </section>
 
-        {/* ── Roadmap ───────────────────────────────────────── */}
+        {/* ── Roadmap – collapsible to save mobile space ─────── */}
         <section className="space-y-4">
           <div className="space-y-2 text-center">
             <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Platform Roadmap</p>
-            <h2 className="text-[24px] font-bold leading-[32px] text-[#18181B] md:text-[30px] md:leading-[38px]">
+            <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
               What&apos;s coming next
             </h2>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {ROADMAP.map((r) => {
-              const statusMap: Record<string, { label: string; bg: string; text: string }> = {
-                next: { label: "Up next", bg: "bg-emerald-50", text: "text-emerald-700" },
-                soon: { label: "Soon", bg: "bg-[#F4F4F5]", text: "text-[#52525B]" },
-                later: { label: "Later", bg: "bg-[#F4F4F5]", text: "text-[#71717A]" },
-              };
-              const status = statusMap[r.status] || statusMap.later;
-              return (
-                <div
-                  key={r.title}
-                  className="flex items-start gap-3 rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B]"
-                >
-                  <span className="text-2xl">{r.icon}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-[#18181B]">{r.title}</p>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}
-                      >
-                        {status.label}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-sm text-[#52525B]">{r.desc}</p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="text-center">
+            <button
+              onClick={() => setShowRoadmap(!showRoadmap)}
+              className="inline-flex items-center gap-1 rounded-md border border-[#E4E4E7] bg-white px-4 py-2 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+            >
+              {showRoadmap ? "Hide roadmap ▲" : "View roadmap ▼"}
+            </button>
           </div>
+          {showRoadmap && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {ROADMAP.map((r) => {
+                const statusMap: Record<string, { label: string; bg: string; text: string }> = {
+                  next: { label: "Up next", bg: "bg-emerald-50", text: "text-emerald-700" },
+                  soon: { label: "Soon", bg: "bg-[#F4F4F5]", text: "text-[#52525B]" },
+                  later: { label: "Later", bg: "bg-[#F4F4F5]", text: "text-[#71717A]" },
+                };
+                const status = statusMap[r.status] || statusMap.later;
+                return (
+                  <div
+                    key={r.title}
+                    className="flex items-start gap-3 rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B]"
+                  >
+                    <span className="text-2xl">{r.icon}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-[#18181B]">{r.title}</p>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}
+                        >
+                          {status.label}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-sm text-[#52525B]">{r.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* ── Footer ────────────────────────────────────────── */}
