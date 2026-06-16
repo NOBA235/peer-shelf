@@ -17,7 +17,7 @@ interface Props {
   onWishlist: () => void;
 }
 
-/* ── Animated stat counter ─────────────────────────────── */
+/* ── Animated stat counter */
 function Counter({ target }: { target: number }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
@@ -172,7 +172,7 @@ function CombinedSearch() {
   );
 }
 
-/* ── Main Home Section (Refactored) ───────────────────── */
+/* ── Main Home Section ─ */
 export default function HomeSection({
   onTabChange,
   onListingClick,
@@ -196,7 +196,6 @@ export default function HomeSection({
     });
   }, []);
 
-  // Replace these paths with the actual filenames inside your /public/images folder
   const communityImages = [
     "/images/image1.png",
     "/images/image2.png",
@@ -205,11 +204,9 @@ export default function HomeSection({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 py-12 text-[#18181B] sm:px-6 sm:py-20 lg:px-8">
-      {/* Increased vertical spacing between sections */}
-      <div className="mx-auto max-w-7xl space-y-16 sm:space-y-24 lg:space-y-28">
-        
-        {/* ── HERO — mobile stacked, side-by-side from md onwards ── */}
+    <div className="min-h-screen bg-[#FAFAFA] px-4 py-16 text-[#18181B] sm:px-6 sm:py-28 lg:px-8">
+      {/* Increased vertical padding & section gaps */}
+      <div className="mx-auto max-w-7xl space-y-20 sm:space-y-32 lg:space-y-40">
         <section className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 lg:gap-16">
           {/* Left column */}
           <div className="space-y-5 text-center md:text-left">
@@ -229,36 +226,36 @@ export default function HomeSection({
                   />
                 </div>
               ))}
-              <span className="text-sm text-[#52525B] ml-3">
-                100+ students joined
-              </span>
             </div>
 
-            <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-3xl lg:text-4xl">
+            <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-2xl lg:text-2xl">
               Find Your Peers{" "}
-              <span className="text-[#18181B]">And used books within your campus</span>
+              <span className="text-[#18181B]"></span>
             </h1>
+             <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-2xl lg:text-2xl">
+              And used books within your campus{" "}
+             
+            </h1>
+
 
             <p className="mx-auto max-w-lg text-base text-[#52525B] md:mx-0">
               Discover affordable textbooks, connect with mentors, share notes, and unlock
               educational resources hidden within your community.
             </p>
-
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center md:justify-start">
-              <button
-                onClick={() => onTabChange("marketplace")}
-                className="h-11 w-full rounded-md bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
-              >
-                Browse Resources →
-              </button>
-              <button
-                onClick={onScan}
-                className="h-11 w-full rounded-md border border-[#E4E4E7] bg-white px-6 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
-              >
-                📷 Scan a Book
-              </button>
-            </div>
-
+<div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:justify-start">
+  <button
+    onClick={() => onTabChange("marketplace")}
+    className="h-10 w-full rounded-md bg-[#18181B] px-5 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
+  >
+    Browse Resources →
+  </button>
+  <button
+    onClick={onScan}
+    className="h-10 w-full rounded-md border border-[#E4E4E7] bg-white px-5 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
+  >
+    📷 Scan a Book
+  </button>
+</div>
             <p className="text-sm text-[#71717A]">Free to use · No sign‑up required</p>
 
             {/* Stats grid – same as before */}
