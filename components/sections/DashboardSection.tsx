@@ -20,10 +20,10 @@ const REPUTATION = [
 
 const NOTIF_ICONS: Record<string, string> = { match:"🎉", mentor:"🌟", save:"❤️", review:"⭐", system:"📢" };
 const NOTIF_BG:   Record<string, string> = {
-  match:  "bg-emerald-500/8 border-emerald-500/15",
-  mentor: "bg-violet-500/8 border-violet-500/15",
-  save:   "bg-blue-500/8 border-blue-500/15",
-  review: "bg-amber-500/8 border-amber-500/15",
+  match:  "border-l-emerald-500 bg-emerald-50",
+  mentor: "border-l-violet-500 bg-violet-50",
+  save:   "border-l-blue-500 bg-blue-50",
+  review: "border-l-amber-500 bg-amber-50",
   system: "",
 };
 
@@ -50,154 +50,228 @@ export default function DashboardSection() {
   const unread = notifs.filter(n => !n.read).length;
 
   return (
-    <div className="space-y-6 pt-6">
-
-      {/* Profile card */}
-      <Card hover={false} className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 to-transparent pointer-events-none" />
-        <div className="flex items-center gap-4 relative">
-          <div className="relative flex-shrink-0">
-            <Avatar initials="YO" size="xl" />
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-[#0a0a0f] flex items-center justify-center text-[8px] text-white">✓</div>
-          </div>
-          <div className="flex-1">
-            <h1 className="heading-md text-white">Your Dashboard</h1>
-            <p className="body-sm">Member since Jan 2024</p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <Badge color="violet">⭐ Top Contributor</Badge>
-              <Badge color="emerald">✓ Verified Student</Badge>
+    <div className="min-h-screen bg-[#FAFAFA] px-4 py-8 text-[#18181B] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        {/* Profile card */}
+        <div className="rounded-xl border border-[#E4E4E7] bg-white p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="relative flex-shrink-0">
+              <Avatar initials="YO" size="xl" />
+              <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-[8px] text-white">
+                ✓
+              </div>
             </div>
+            <div className="flex-1">
+              <h1 className="text-[24px] font-bold leading-[32px] text-[#18181B]">Your Dashboard</h1>
+              <p className="text-sm text-[#52525B]">Member since Jan 2024</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Badge color="violet">⭐ Top Contributor</Badge>
+                <Badge color="emerald">✓ Verified Student</Badge>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              [listings.length || 12, "Books"],
+              [28, "Notes"],
+              [34, "Helped"],
+              ["4.8★", "Rating"],
+            ].map(([v, l]) => (
+              <div key={l as string} className="text-center">
+                <p className="text-lg font-extrabold text-[#18181B]">{v}</p>
+                <p className="text-xs text-[#71717A]">{l}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 mt-5 relative">
-          {[[listings.length || 12,"Books"],[28,"Notes"],[34,"Helped"],["4.8★","Rating"]].map(([v,l]) => (
-            <div key={l as string} className="text-center">
-              <p className="font-extrabold text-white text-lg">{v}</p>
-              <p className="caption">{l}</p>
-            </div>
+        {/* Tab bar */}
+        <div className="flex border-b border-[#E4E4E7]">
+          {(["overview", "listings", "activity"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`border-b-2 px-4 py-2.5 text-sm font-medium capitalize transition ${
+                tab === t
+                  ? "border-[#18181B] text-[#18181B]"
+                  : "border-transparent text-[#71717A] hover:text-[#18181B]"
+              }`}
+            >
+              {t}
+            </button>
           ))}
         </div>
-      </Card>
 
-      {/* Tab bar */}
-      <div className="tab-bar">
-        {(["overview","listings","activity"] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} className={`tab-btn ${tab === t ? "tab-btn-active" : ""}`}>
-            {t}
-          </button>
-        ))}
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-14 rounded-md" />
+            ))}
+          </div>
+        ) : (
+          <>
+            {tab === "overview" && (
+              <div className="space-y-6">
+                {/* Notifications */}
+                <div>
+                  <div className="mb-3 flex items-center justify-between">
+                    <SectionHeader label="🔔 Notifications" />
+                    {unread > 0 && <Badge color="violet">{unread} new</Badge>}
+                  </div>
+                  <div className="space-y-2">
+                    {notifs.length === 0 ? (
+                      <p className="py-4 text-center text-sm text-[#71717A]">
+                        No notifications yet
+                      </p>
+                    ) : (
+                      notifs.slice(0, 5).map((n) => (
+                        <div
+                          key={n._id}
+                          className={`rounded-md border border-[#E4E4E7] bg-white p-3 flex gap-3 items-start ${
+                            !n.read ? `border-l-4 ${NOTIF_BG[n.type] || "border-l-transparent"}` : ""
+                          }`}
+                        >
+                          <span className="flex-shrink-0 text-lg">{NOTIF_ICONS[n.type]}</span>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm leading-snug text-[#18181B]">{n.text}</p>
+                            <p className="mt-0.5 text-xs text-[#71717A]">{n.time}</p>
+                          </div>
+                          {!n.read && (
+                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#18181B]" />
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Reputation */}
+                <div>
+                  <SectionHeader label="🏆 Reputation" />
+                  <div className="space-y-3">
+                    {REPUTATION.map((r) => (
+                      <div
+                        key={r.label}
+                        className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-md border border-[#E4E4E7] bg-white p-3"
+                      >
+                        <div className="flex items-center gap-3 sm:flex-1">
+                          <span className="flex-shrink-0 text-lg">{r.icon}</span>
+                          <span className="text-sm text-[#52525B]">{r.label}</span>
+                        </div>
+                        <div className="flex items-center gap-3 sm:w-48">
+                          <div className="h-1.5 flex-1 rounded-full bg-[#F4F4F5]">
+                            <div
+                              className="h-1.5 rounded-full bg-[#18181B]"
+                              style={{ width: `${Math.min((r.value / r.max) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <span className="w-6 text-right text-sm font-bold text-[#18181B]">
+                            {r.value}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Wishlist status */}
+                <div>
+                  <SectionHeader label="🔖 My Requests" />
+                  <div className="space-y-2">
+                    {wishlist.length === 0 ? (
+                      <p className="py-4 text-center text-sm text-[#71717A]">
+                        No requests yet
+                      </p>
+                    ) : (
+                      wishlist.slice(0, 3).map((w) => (
+                        <div
+                          key={w._id}
+                          className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-md border border-[#E4E4E7] bg-white p-3"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="line-clamp-1 text-sm font-medium text-[#18181B]">
+                              {w.title}
+                            </p>
+                            <p className="text-xs text-[#71717A]">
+                              {w.subject} · {w.curriculum}
+                            </p>
+                          </div>
+                          <Badge
+                            color={
+                              w.status === "match"
+                                ? "emerald"
+                                : w.status === "potential"
+                                ? "amber"
+                                : "blue"
+                            }
+                          >
+                            {w.status === "match"
+                              ? "Matched"
+                              : w.status === "potential"
+                              ? "Potential"
+                              : "Searching"}
+                          </Badge>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {tab === "listings" && (
+              <div className="space-y-3">
+                <SectionHeader label="📦 My Active Listings" />
+                {listings.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-[#71717A]">No listings yet</p>
+                ) : (
+                  listings.slice(0, 5).map((l) => (
+                    <div
+                      key={l._id}
+                      className="flex cursor-pointer items-center gap-3 rounded-md border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
+                    >
+                      <span className="text-2xl">{l.image}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-1 text-sm font-medium text-[#18181B]">
+                          {l.title}
+                        </p>
+                        <p className="text-xs text-[#71717A]">
+                          {l.price === 0 ? "Free" : `₹${l.price}`} · {l.condition} · ❤️ {l.saves}
+                        </p>
+                      </div>
+                      <Badge color="emerald">Active</Badge>
+                    </div>
+                  ))
+                )}
+                <button className="w-full rounded-md border border-[#E4E4E7] bg-white px-4 py-2.5 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA]">
+                  + Add New Listing
+                </button>
+              </div>
+            )}
+
+            {tab === "activity" && (
+              <div className="space-y-3">
+                <SectionHeader label="📋 Recent Activity" />
+                {ACTIVITY.map((a, i) => (
+                  <div
+                    key={i}
+                    className="flex cursor-pointer items-center gap-3 rounded-md border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
+                  >
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md border border-[#E4E4E7] bg-[#FAFAFA] text-xl">
+                      {a.icon}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-[#18181B]">{a.text}</p>
+                      <p className="mt-0.5 text-xs text-[#71717A]">{a.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
-
-      {loading ? (
-        <div className="space-y-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-14" />)}</div>
-      ) : (
-        <>
-          {tab === "overview" && (
-            <div className="space-y-6">
-              {/* Notifications */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <SectionHeader label="🔔 Notifications" />
-                  {unread > 0 && <Badge color="violet">{unread} new</Badge>}
-                </div>
-                <div className="space-y-2">
-                  {notifs.length === 0
-                    ? <p className="body-sm text-center py-4">No notifications yet</p>
-                    : notifs.slice(0, 5).map(n => (
-                      <div key={n._id} className={`glass rounded-xl p-3 flex gap-3 items-start border ${!n.read ? NOTIF_BG[n.type] : "border-transparent"}`}>
-                        <span className="text-lg flex-shrink-0">{NOTIF_ICONS[n.type]}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="body-sm text-white/75 leading-snug">{n.text}</p>
-                          <p className="caption mt-0.5">{n.time}</p>
-                        </div>
-                        {!n.read && <div className="w-1.5 h-1.5 bg-violet-400 rounded-full flex-shrink-0 mt-1.5" />}
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-
-              {/* Reputation */}
-              <div>
-                <SectionHeader label="🏆 Reputation" />
-                <div className="space-y-3">
-                  {REPUTATION.map(r => (
-                    <div key={r.label} className="flex items-center gap-3">
-                      <span className="text-lg w-6 flex-shrink-0">{r.icon}</span>
-                      <span className="body-sm text-white/60 flex-1">{r.label}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="progress-track w-20">
-                          <div className="progress-fill" style={{ width: `${Math.min((r.value/r.max)*100,100)}%` }} />
-                        </div>
-                        <span className="font-bold text-white text-sm w-6 text-right">{r.value}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Wishlist status */}
-              <div>
-                <SectionHeader label="🔖 My Requests" />
-                <div className="space-y-2">
-                  {wishlist.length === 0
-                    ? <p className="body-sm text-center py-4">No requests yet</p>
-                    : wishlist.slice(0,3).map(w => (
-                      <div key={w._id} className="glass rounded-xl p-3 flex items-center gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="body-sm text-white/75 line-clamp-1">{w.title}</p>
-                          <p className="caption">{w.subject} · {w.curriculum}</p>
-                        </div>
-                        <Badge color={w.status==="match"?"emerald":w.status==="potential"?"amber":"blue"}>
-                          {w.status==="match"?"Matched":w.status==="potential"?"Potential":"Searching"}
-                        </Badge>
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            </div>
-          )}
-
-          {tab === "listings" && (
-            <div className="space-y-3">
-              <SectionHeader label="📦 My Active Listings" />
-              {listings.length === 0
-                ? <p className="body-sm text-center py-4">No listings yet</p>
-                : listings.slice(0,5).map(l => (
-                  <div key={l._id} className="glass glass-hover rounded-xl p-4 flex items-center gap-3 cursor-pointer">
-                    <span className="text-2xl">{l.image}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-white text-sm line-clamp-1">{l.title}</p>
-                      <p className="caption">{l.price===0?"Free":`₹${l.price}`} · {l.condition} · ❤️ {l.saves}</p>
-                    </div>
-                    <Badge color="emerald">Active</Badge>
-                  </div>
-                ))
-              }
-              <button className="btn-ghost w-full border-violet-500/25 text-violet-400">
-                + Add New Listing
-              </button>
-            </div>
-          )}
-
-          {tab === "activity" && (
-            <div className="space-y-3">
-              <SectionHeader label="📋 Recent Activity" />
-              {ACTIVITY.map((a, i) => (
-                <div key={i} className="glass glass-hover rounded-xl p-4 flex items-center gap-3 cursor-pointer">
-                  <div className="w-10 h-10 glass rounded-xl flex items-center justify-center text-xl flex-shrink-0">{a.icon}</div>
-                  <div className="flex-1">
-                    <p className="body-sm text-white/75">{a.text}</p>
-                    <p className="caption mt-0.5">{a.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
     </div>
   );
 }
