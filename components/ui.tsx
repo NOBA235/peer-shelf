@@ -157,15 +157,17 @@ export const StatCard = ({
   </div>
 );
 
-// ── Chip / filter pill ─────────────────────────────────────────
+// ── Chip / filter pill (updated: now accepts className) ────────
 export const Chip = ({
   children,
   active,
   onClick,
+  className = "",
 }: {
   children: ReactNode;
   active?: boolean;
   onClick?: () => void;
+  className?: string;               // added className prop
 }) => (
   <button
     onClick={onClick}
@@ -173,7 +175,7 @@ export const Chip = ({
       active
         ? "border-[#18181B] bg-[#F4F4F5] text-[#18181B]"
         : "border-[#E4E4E7] bg-white text-[#52525B] hover:border-[#18181B] hover:bg-[#FAFAFA]"
-    }`}
+    } ${className}`}               // appended className here
   >
     {children}
   </button>
