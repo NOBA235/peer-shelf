@@ -209,8 +209,8 @@ export default function HomeSection({
 
             {/* Fixed typography scale – sensible mobile sizes */}
             <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-4xl lg:text-5xl">
-              Turn Every Student Shelf{" "}
-              <span className="text-[#18181B]">Into a Knowledge Network</span>
+           Find Your Peers{" "}
+              <span className="text-[#18181B]">Find used books within your campus</span>
             </h1>
 
             <p className="mx-auto max-w-lg text-base text-[#52525B] lg:mx-0">
