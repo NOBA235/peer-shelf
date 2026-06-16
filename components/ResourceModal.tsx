@@ -4,28 +4,31 @@ import { Listing } from "@/lib/data";
 import { fetchMentors, fetchListings, createResourceRequest, saveListing, MentorDoc, ListingDoc } from "@/lib/api";
 import { Badge, Avatar, StarRating, Skeleton } from "./ui";
 
-interface Props { listing: Listing; onClose: () => void; }
+interface Props {
+  listing: Listing;
+  onClose: () => void;
+}
 
 export default function ResourceModal({ listing: l, onClose }: Props) {
-  const [tab, setTab]                       = useState<"details"|"seller"|"similar">("details");
-  const [linkedMentor, setLinkedMentor]     = useState<MentorDoc | null>(null);
-  const [similar, setSimilar]               = useState<ListingDoc[] | null>(null);
-  const [sellerCount, setSellerCount]       = useState<number | null>(null);
+  const [tab, setTab] = useState<"details" | "seller" | "similar">("details");
+  const [linkedMentor, setLinkedMentor] = useState<MentorDoc | null>(null);
+  const [similar, setSimilar] = useState<ListingDoc[] | null>(null);
+  const [sellerCount, setSellerCount] = useState<number | null>(null);
 
   // Request state
-  const [requesting, setRequesting]         = useState(false);
-  const [requested, setRequested]           = useState(false);
-  const [requestError, setRequestError]     = useState("");
+  const [requesting, setRequesting] = useState(false);
+  const [requested, setRequested] = useState(false);
+  const [requestError, setRequestError] = useState("");
 
   // Save/heart state
-  const [saved, setSaved]                   = useState(false);
-  const [saving, setSaving]                 = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Fetch linked mentor when listing has mentor=true
   useEffect(() => {
     if (!l.mentor) return;
     fetchMentors({ subject: l.subject })
-      .then(ms => setLinkedMentor(ms[0] ?? null))
+      .then((ms) => setLinkedMentor(ms[0] ?? null))
       .catch(() => setLinkedMentor(null));
   }, [l.mentor, l.subject]);
 
@@ -33,7 +36,7 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
   useEffect(() => {
     if (tab !== "similar" || similar !== null) return;
     fetchListings({ subject: l.subject })
-      .then(items => setSimilar(items.filter(i => i._id !== String(l.id)).slice(0, 4)))
+      .then((items) => setSimilar(items.filter((i) => i._id !== String(l.id)).slice(0, 4)))
       .catch(() => setSimilar([]));
   }, [tab, l.subject, l.id, similar]);
 
@@ -41,7 +44,7 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
   useEffect(() => {
     if (tab !== "seller" || sellerCount !== null) return;
     fetchListings({ search: l.seller })
-      .then(items => setSellerCount(items.filter(i => i.seller === l.seller).length))
+      .then((items) => setSellerCount(items.filter((i) => i.seller === l.seller).length))
       .catch(() => setSellerCount(0));
   }, [tab, l.seller, sellerCount]);
 
@@ -77,39 +80,43 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
   const TABS = ["details", "seller", "similar"] as const;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4">
-      <div className="glass w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col">
-
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#18181B]/50 p-4 backdrop-blur-sm sm:items-center">
+      <div className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-lg">
         {/* ── Header ─────────────────────────────────────── */}
-        <div className="flex items-start gap-4 p-6 pb-4 flex-shrink-0">
-          <div
-            className="w-16 h-20 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0"
-            style={{ background: l.color + "18", border: `1px solid ${l.color}28` }}
-          >
+        <div className="flex flex-shrink-0 items-start gap-4 p-6 pb-4">
+          <div className="flex h-20 w-16 flex-shrink-0 items-center justify-center rounded-md border border-[#E4E4E7] bg-[#F4F4F5] text-4xl">
             {l.image}
           </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="heading-md text-white leading-snug">{l.title}</h2>
-            <p className="body-sm mt-0.5">by {l.author}</p>
-            <div className="flex flex-wrap gap-1.5 mt-2">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[18px] font-bold leading-snug text-[#18181B] sm:text-[24px] sm:leading-[32px]">
+              {l.title}
+            </h2>
+            <p className="mt-0.5 text-sm text-[#52525B]">by {l.author}</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
               <Badge color="violet">{l.subject}</Badge>
               <Badge color="blue">{l.curriculum}</Badge>
               <Badge color="slate">{l.grade}</Badge>
             </div>
           </div>
-          <button onClick={onClose} className="btn-ghost btn-sm px-2.5 flex-shrink-0">✕</button>
+          <button
+            onClick={onClose}
+            className="flex-shrink-0 rounded-md p-1.5 text-[#71717A] transition hover:text-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+            aria-label="Close modal"
+          >
+            ✕
+          </button>
         </div>
 
         {/* ── Tab bar ────────────────────────────────────── */}
-        <div className="flex px-6 border-b border-white/8 flex-shrink-0">
-          {TABS.map(t => (
+        <div className="flex flex-shrink-0 border-b border-[#E4E4E7] px-6">
+          {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2.5 body-sm font-semibold capitalize transition-all border-b-2 -mb-px ${
+              className={`border-b-2 px-4 py-2.5 text-sm font-semibold capitalize transition -mb-px ${
                 tab === t
-                  ? "text-violet-400 border-violet-500"
-                  : "text-white/40 border-transparent hover:text-white/60"
+                  ? "border-[#18181B] text-[#18181B]"
+                  : "border-transparent text-[#71717A] hover:text-[#18181B]"
               }`}
             >
               {t}
@@ -118,36 +125,39 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
         </div>
 
         {/* ── Scrollable content ─────────────────────────── */}
-        <div className="overflow-y-auto flex-1 p-6 space-y-5">
-
+        <div className="flex-1 space-y-5 overflow-y-auto p-6">
           {/* Details tab */}
           {tab === "details" && (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
-                  ["Price",     l.price === 0 ? "Free" : `₹${l.price}`],
+                  ["Price", l.price === 0 ? "Free" : `₹${l.price}`],
                   ["Condition", l.condition],
-                  ["City",      l.city],
-                  ["Listed",    `${l.listedDaysAgo}d ago`],
+                  ["City", l.city],
+                  ["Listed", `${l.listedDaysAgo}d ago`],
                 ].map(([k, v]) => (
-                  <div key={k} className="bg-white/4 border border-white/6 rounded-xl p-3">
-                    <p className="caption">{k}</p>
-                    <p className="font-semibold text-white text-sm mt-0.5">{v}</p>
+                  <div key={k} className="rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-3">
+                    <p className="text-xs font-medium uppercase tracking-wider text-[#71717A]">{k}</p>
+                    <p className="mt-0.5 text-sm font-semibold text-[#18181B]">{v}</p>
                   </div>
                 ))}
               </div>
 
               <div>
-                <p className="caption mb-2">Description</p>
-                <p className="body-md">{l.description}</p>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[#71717A]">
+                  Description
+                </p>
+                <p className="text-[16px] text-[#52525B]">{l.description}</p>
               </div>
 
               <div>
-                <p className="caption mb-2">What&apos;s Included</p>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[#71717A]">
+                  What&apos;s Included
+                </p>
                 <div className="space-y-2">
-                  {l.included.map(item => (
-                    <div key={item} className="flex items-center gap-2 body-sm text-white/70">
-                      <span className="w-4 h-4 bg-emerald-500/20 rounded-full flex items-center justify-center text-[10px] text-emerald-400 flex-shrink-0">
+                  {l.included.map((item) => (
+                    <div key={item} className="flex items-center gap-2 text-sm text-[#52525B]">
+                      <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[10px] text-emerald-700">
                         ✓
                       </span>
                       {item}
@@ -156,34 +166,36 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
                 </div>
               </div>
 
-              <div className="glass rounded-xl p-4 flex items-center gap-3">
+              <div className="rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-4 flex items-center gap-3">
                 <span className="text-2xl">📍</span>
                 <div>
-                  <p className="caption">Preferred Pickup Point</p>
-                  <p className="font-medium text-white text-sm">{l.meetupPoint}</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-[#71717A]">
+                    Preferred Pickup Point
+                  </p>
+                  <p className="text-sm font-medium text-[#18181B]">{l.meetupPoint}</p>
                 </div>
               </div>
 
               {/* Linked mentor — real data from MongoDB */}
               {l.mentor && linkedMentor && (
-                <div className="bg-amber-500/8 border border-amber-500/20 rounded-2xl p-4 space-y-3">
-                  <p className="caption text-amber-400 font-semibold uppercase tracking-wider">
+                <div className="rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-4 space-y-3 border-l-2 border-l-amber-500">
+                  <p className="text-xs font-medium uppercase tracking-wider text-amber-700">
                     🌟 Linked Mentor
                   </p>
                   <div className="flex items-center gap-3">
                     <Avatar initials={linkedMentor.initials} size="md" gradient="amber" />
                     <div className="flex-1">
-                      <p className="font-semibold text-white">{linkedMentor.name}</p>
-                      <p className="caption text-amber-300/70">{linkedMentor.achievement}</p>
+                      <p className="font-semibold text-[#18181B]">{linkedMentor.name}</p>
+                      <p className="text-xs text-[#71717A]">{linkedMentor.achievement}</p>
                     </div>
                     <StarRating rating={linkedMentor.rating} />
                   </div>
-                  <p className="body-sm italic">"{linkedMentor.quote}"</p>
+                  <p className="text-sm italic text-[#52525B]">"{linkedMentor.quote}"</p>
                 </div>
               )}
               {l.mentor && !linkedMentor && (
-                <div className="bg-white/4 border border-white/6 rounded-xl p-4">
-                  <p className="caption">🌟 Fetching linked mentor…</p>
+                <div className="rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-4">
+                  <p className="text-sm text-[#71717A]">🌟 Fetching linked mentor…</p>
                 </div>
               )}
             </>
@@ -195,28 +207,30 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
               <div className="flex items-center gap-4">
                 <Avatar initials={l.sellerInitials} size="lg" />
                 <div>
-                  <p className="font-bold text-white text-lg">{l.seller.replace(".", "")}</p>
+                  <p className="text-lg font-bold text-[#18181B]">{l.seller.replace(".", "")}</p>
                   <StarRating rating={l.rating} />
-                  <p className="caption mt-0.5">📍 {l.location}</p>
+                  <p className="mt-0.5 text-xs text-[#71717A]">📍 {l.location}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/4 border border-white/6 rounded-xl p-3 text-center">
-                  <p className="font-bold text-white text-lg">
+                <div className="rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-3 text-center">
+                  <p className="text-lg font-bold text-[#18181B]">
                     {sellerCount === null ? "…" : sellerCount}
                   </p>
-                  <p className="caption">Active Listings</p>
+                  <p className="text-xs text-[#71717A]">Active Listings</p>
                 </div>
-                <div className="bg-white/4 border border-white/6 rounded-xl p-3 text-center">
-                  <p className="font-bold text-white text-lg">{l.rating}★</p>
-                  <p className="caption">Rating</p>
+                <div className="rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-3 text-center">
+                  <p className="text-lg font-bold text-[#18181B]">{l.rating}★</p>
+                  <p className="text-xs text-[#71717A]">Rating</p>
                 </div>
               </div>
 
-              <div className="bg-white/4 border border-white/6 rounded-xl p-4 text-center space-y-1">
-                <p className="body-sm font-medium text-white">Reviews</p>
-                <p className="caption">Reviews aren&apos;t collected yet — coming in a future update.</p>
+              <div className="rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-4 text-center">
+                <p className="text-sm font-medium text-[#18181B]">Reviews</p>
+                <p className="mt-1 text-sm text-[#71717A]">
+                  Reviews aren&apos;t collected yet — coming in a future update.
+                </p>
               </div>
             </div>
           )}
@@ -224,31 +238,31 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
           {/* Similar tab — real listings from MongoDB by subject */}
           {tab === "similar" && (
             <div className="space-y-3">
-              <p className="body-sm">
-                Other <span className="text-white font-medium">{l.subject}</span> resources available
+              <p className="text-sm text-[#52525B]">
+                Other <span className="font-medium text-[#18181B]">{l.subject}</span> resources available
               </p>
               {similar === null ? (
                 <>
-                  <Skeleton className="h-14" />
-                  <Skeleton className="h-14" />
-                  <Skeleton className="h-14" />
+                  <Skeleton className="h-14 rounded-md" />
+                  <Skeleton className="h-14 rounded-md" />
+                  <Skeleton className="h-14 rounded-md" />
                 </>
               ) : similar.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="body-sm">No other {l.subject} listings yet.</p>
+                <div className="py-8 text-center">
+                  <p className="text-sm text-[#71717A]">No other {l.subject} listings yet.</p>
                 </div>
               ) : (
-                similar.map(s => (
+                similar.map((s) => (
                   <div
                     key={s._id}
-                    className="glass glass-hover cursor-pointer rounded-xl p-3 flex items-center gap-3"
+                    className="flex cursor-pointer items-center gap-3 rounded-md border border-[#E4E4E7] bg-white p-3 transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
                   >
                     <span className="text-2xl">{s.image}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="body-sm text-white font-medium line-clamp-1">{s.title}</p>
-                      <p className="caption">{s.condition} · {s.city}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-1 text-sm font-medium text-[#18181B]">{s.title}</p>
+                      <p className="text-xs text-[#71717A]">{s.condition} · {s.city}</p>
                     </div>
-                    <span className="font-bold text-violet-400 text-sm flex-shrink-0">
+                    <span className="flex-shrink-0 text-sm font-bold text-[#18181B]">
                       {s.price === 0 ? "Free" : `₹${s.price}`}
                     </span>
                   </div>
@@ -259,34 +273,39 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
         </div>
 
         {/* ── Footer actions — all wired to real API calls ── */}
-        <div className="p-6 pt-4 flex gap-2 border-t border-white/8 flex-shrink-0">
+        <div className="flex flex-shrink-0 flex-col gap-2 border-t border-[#E4E4E7] p-6 pt-4">
           {requestError && (
-            <p className="caption text-rose-400 w-full mb-2">{requestError}</p>
+            <p className="text-sm text-rose-600">{requestError}</p>
           )}
-          {requested ? (
-            <div className="flex-1 bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 py-3.5 rounded-xl font-semibold text-sm text-center">
-              ✓ Request Saved to Database
-            </div>
-          ) : (
+          <div className="flex gap-2">
+            {requested ? (
+              <div className="flex-1 rounded-md border border-emerald-200 bg-emerald-50 py-3.5 text-center text-sm font-semibold text-emerald-700">
+                ✓ Request Saved to Database
+              </div>
+            ) : (
+              <button
+                onClick={sendRequest}
+                disabled={requesting}
+                className="flex-1 rounded-md bg-[#18181B] py-3 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 disabled:opacity-50"
+              >
+                {requesting ? "Sending…" : "Request Resource"}
+              </button>
+            )}
             <button
-              onClick={sendRequest}
-              disabled={requesting}
-              className="btn-primary flex-1 disabled:opacity-50"
-              style={{ padding: "0.875rem" }}
+              onClick={handleSave}
+              disabled={saved || saving}
+              title={saved ? "Saved" : "Save listing"}
+              className={`rounded-md border px-4 text-base transition focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 ${
+                saved
+                  ? "border-rose-200 bg-rose-50 text-rose-700"
+                  : "border-[#E4E4E7] bg-white text-[#18181B] hover:border-[#18181B] hover:bg-[#FAFAFA]"
+              }`}
+              style={{ minHeight: "48px" }}
             >
-              {requesting ? "Sending…" : "Request Resource"}
+              {saving ? "…" : saved ? "❤️" : "🤍"}
             </button>
-          )}
-          <button
-            onClick={handleSave}
-            disabled={saved || saving}
-            title={saved ? "Saved" : "Save listing"}
-            className={`btn-ghost px-4 text-lg transition-all ${saved ? "text-rose-400 border-rose-500/30" : ""}`}
-          >
-            {saving ? "…" : saved ? "❤️" : "🤍"}
-          </button>
+          </div>
         </div>
-
       </div>
     </div>
   );
