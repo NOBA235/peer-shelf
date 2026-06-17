@@ -39,7 +39,6 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
     setStage("searching");
     try {
       const item = await createWishlistItem(form);
-      // simulate a short delay for the searching animation
       await new Promise((r) => setTimeout(r, 1800));
       setResult(item);
       setStage("match");
@@ -58,8 +57,8 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#18181B]/40 p-4 backdrop-blur-sm sm:items-center">
       <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-[#E4E4E7] p-5">
-          <div>
+        <div className="flex items-start justify-between border-b border-[#E4E4E7] p-5 sm:p-6">
+          <div className="pr-4">
             <div className="flex items-center gap-2">
               <Bookmark size={20} className="text-[#18181B]" />
               <h2 className="text-lg font-bold text-[#18181B] sm:text-xl">
@@ -67,7 +66,7 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
               </h2>
             </div>
             <p className="mt-0.5 text-xs text-[#71717A]">
-              We'll match you with nearby students who have what you need.
+              We&apos;ll match you with nearby students who have what you need.
             </p>
           </div>
           <button
@@ -78,11 +77,11 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
           </button>
         </div>
 
-        {/* Content */}
-        <div className="space-y-5 p-5">
+        {/* Content – increased gaps and padding */}
+        <div className="space-y-6 p-5 sm:p-6">
           {stage === "form" && (
-            <div className="space-y-4">
-              <div className="space-y-3">
+            <div className="space-y-5">
+              <div className="space-y-4">
                 <InputField
                   label="Resource Name"
                   value={form.title}
@@ -95,7 +94,7 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
                   onChange={(v) => updateField("subject", v)}
                   placeholder="e.g. Chemistry"
                 />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <InputField
                     label="Curriculum / Exam"
                     value={form.curriculum}
@@ -120,7 +119,7 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
 
               <button
                 onClick={submit}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#18181B] py-2.5 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#18181B] py-3 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
               >
                 <Search size={16} />
                 Search Network
@@ -129,7 +128,7 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
           )}
 
           {stage === "searching" && (
-            <div className="flex flex-col items-center gap-6 py-8">
+            <div className="flex flex-col items-center gap-6 py-10">
               <div className="relative">
                 <Loader2 size={48} className="animate-spin text-[#18181B]" />
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -148,30 +147,23 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
           )}
 
           {stage === "match" && result && (
-            <div className="space-y-4">
-              {/* Match found */}
+            <div className="space-y-5">
               {result.status === "match" && (
                 <>
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 text-center">
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 text-center sm:p-6">
                     <CheckCircle2 size={32} className="mx-auto mb-3 text-emerald-600" />
-                    <h3 className="text-lg font-bold text-emerald-700">
-                      Match Found!
-                    </h3>
+                    <h3 className="text-lg font-bold text-emerald-700">Match Found!</h3>
                     <p className="mt-1 text-sm text-emerald-700/80">
                       A student nearby has the exact resource you need.
                     </p>
                   </div>
-                  <div className="flex items-center gap-4 rounded-xl border border-[#E4E4E7] bg-white p-4">
+                  <div className="flex items-center gap-4 rounded-xl border border-[#E4E4E7] bg-white p-4 sm:p-5">
                     <Avatar
-                      initials={
-                        result.matchName?.slice(0, 2).toUpperCase() ?? "ST"
-                      }
+                      initials={result.matchName?.slice(0, 2).toUpperCase() ?? "ST"}
                       size="md"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-[#18181B]">
-                        {result.matchName}
-                      </p>
+                      <p className="font-semibold text-[#18181B]">{result.matchName}</p>
                       <p className="text-sm text-[#52525B]">{result.title}</p>
                       <div className="mt-1 flex items-center gap-1 text-xs text-emerald-700">
                         <MapPin size={12} />
@@ -179,17 +171,16 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
                       </div>
                     </div>
                   </div>
-                  <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700">
+                  <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-medium text-white transition hover:bg-emerald-700">
                     Contact Seller
                     <ArrowRight size={16} />
                   </button>
                 </>
               )}
 
-              {/* Potential matches */}
               {result.status === "potential" && (
-                <div className="space-y-4">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5 text-center">
+                <div className="space-y-5">
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5 text-center sm:p-6">
                     <Sparkles size={32} className="mx-auto mb-3 text-amber-600" />
                     <h3 className="text-lg font-bold text-amber-700">
                       {result.matchCount} Potential Match{result.matchCount !== 1 && "es"}
@@ -200,7 +191,7 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
                   </div>
                   <button
                     onClick={onClose}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white py-2.5 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white py-3 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
                   >
                     View in Wishlist
                     <ArrowRight size={16} />
@@ -208,21 +199,18 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
                 </div>
               )}
 
-              {/* No match – searching */}
               {result.status === "searching" && (
-                <div className="space-y-4">
-                  <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-5 text-center">
+                <div className="space-y-5">
+                  <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-5 text-center sm:p-6">
                     <Search size={32} className="mx-auto mb-3 text-blue-600" />
-                    <h3 className="text-lg font-bold text-blue-700">
-                      Added to Wishlist
-                    </h3>
+                    <h3 className="text-lg font-bold text-blue-700">Added to Wishlist</h3>
                     <p className="mt-1 text-sm text-blue-700/80">
-                      No matches yet — we'll notify you when one appears.
+                      No matches yet — we&apos;ll notify you when one appears.
                     </p>
                   </div>
                   <button
                     onClick={onClose}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white py-2.5 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white py-3 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
                   >
                     Got It
                   </button>
@@ -236,7 +224,7 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
   );
 }
 
-// Tiny reusable input
+// Tiny reusable input — untouched
 function InputField({
   label,
   value,

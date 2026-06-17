@@ -107,17 +107,20 @@ export default function DashboardSection() {
             </div>
           </div>
 
-   {stats.map(({ value, label, Icon }) => (
-  <div key={label} className="text-center">
-    <div className="flex items-center justify-center gap-1.5 text-xl font-extrabold text-[#18181B]">
-      <Icon size={18} className="text-[#52525B]" />
-      {value}
-    </div>
-    <p className="mt-1 text-xs text-[#71717A]">{label}</p>
-  </div>
-))}
+          {/* Stats grid – now properly responsive */}
+          <div className="mt-6 grid grid-cols-3 gap-4">
+            {stats.map(({ value, label, Icon }) => (
+              <div key={label} className="text-center">
+                <div className="flex items-center justify-center gap-1.5 text-xl font-extrabold text-[#18181B]">
+                  <Icon size={18} className="text-[#52525B]" />
+                  {value}
+                </div>
+                <p className="mt-1 text-xs text-[#71717A]">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-</div>
         {/* Tabs */}
         <div className="flex border-b border-[#E4E4E7]">
           {(["overview", "listings", "activity"] as const).map((t) => (
@@ -175,7 +178,7 @@ export default function DashboardSection() {
                             {NOTIF_ICONS[n.type] || <Bell size={16} className="text-[#A1A1AA]" />}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm leading-snug text-[#18181B]">{n.text}</p>
+                            <p className="text-sm leading-snug text-[#18181B] truncate">{n.text}</p>
                             <p className="mt-0.5 text-xs text-[#A1A1AA]">{n.time}</p>
                           </div>
                           {!n.read && (
@@ -236,7 +239,7 @@ export default function DashboardSection() {
                         >
                           <div className="min-w-0 flex-1">
                             <p className="line-clamp-1 text-sm font-medium text-[#18181B]">{w.title}</p>
-                            <p className="text-xs text-[#71717A]">{w.subject} · {w.curriculum}</p>
+                            <p className="text-xs text-[#71717A] truncate">{w.subject} · {w.curriculum}</p>
                           </div>
                           <Badge
                             color={
@@ -271,7 +274,7 @@ export default function DashboardSection() {
                       <span className="text-2xl">{l.image}</span>
                       <div className="min-w-0 flex-1">
                         <p className="line-clamp-1 text-sm font-medium text-[#18181B]">{l.title}</p>
-                        <p className="text-xs text-[#71717A]">
+                        <p className="text-xs text-[#71717A] truncate">
                           {l.price === 0 ? "Free" : `₹${l.price}`} · {l.condition}
                           {l.saves ? ` · Saved ${l.saves}` : ""}
                         </p>
@@ -302,8 +305,8 @@ export default function DashboardSection() {
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-[#E4E4E7] bg-[#FAFAFA]">
                       <a.icon size={20} className="text-[#52525B]" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-[#18181B]">{a.text}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-[#18181B] truncate">{a.text}</p>
                       <p className="mt-0.5 text-xs text-[#A1A1AA]">{a.time}</p>
                     </div>
                   </div>

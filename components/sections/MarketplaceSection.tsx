@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { fetchListings, ListingDoc, ListingFilters } from "@/lib/api";
 import { Listing } from "@/lib/data";
-import { Card, Chip, Skeleton, EmptyState, SectionLabel } from "../ui";
+import { Chip, Skeleton, EmptyState, SectionLabel } from "../ui";
 import ListingCard from "../ListingCard";
 import { Search, SlidersHorizontal, BookmarkPlus, PackageOpen } from "lucide-react";
 
@@ -31,7 +31,10 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
   const [sortBy, setSortBy] = useState("createdAt");
   const [showFilters, setShowFilters] = useState(false);
 
-  const activeFilters = [subject !== "All", type !== "All Types", board !== "All Boards", city !== "All Cities"].filter(Boolean).length;
+  const activeFilters =
+    [subject !== "All", type !== "All Types", board !== "All Boards", city !== "All Cities"].filter(
+      Boolean
+    ).length;
 
   const load = async (overrides: Partial<ListingFilters> = {}) => {
     try {
@@ -62,61 +65,55 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
   }, [search]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 py-12 text-[#18181B] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        {/* Header */}
+    <div className="min-h-screen bg-[#FAFAFA] px-4 py-10 text-[#18181B] sm:px-6 lg:px-8">
+      {/* Narrower SaaS-style container */}
+      <div className="mx-auto max-w-5xl space-y-10">
+        {/* ── Header ── */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <SectionLabel>Browse</SectionLabel>
-            <h1 className="text-3xl font-bold tracking-tight text-[#18181B] sm:text-4xl">
-              Marketplace
-            </h1>
-            <p className="mt-1 text-sm text-[#52525B]">
+            <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Marketplace</h1>
+            <p className="mt-1 text-sm text-zinc-500">
               {listings.length} resources available near you
             </p>
           </div>
           <button
             onClick={onRequest}
-            className="inline-flex items-center gap-2 rounded-lg border border-[#E4E4E7] bg-white px-4 py-2.5 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
           >
             <BookmarkPlus size={16} />
             Request a Resource
           </button>
         </div>
 
-        {/* Search + filter toggle */}
+        {/* ── Search & filter toggle ── */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]"
-            />
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search books, notes, formula sheets…"
-              className="w-full rounded-lg border border-[#E4E4E7] bg-white py-2.5 pl-10 pr-4 text-[#18181B] placeholder:text-[#71717A] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
+              className="w-full rounded-lg border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`relative inline-flex h-10 flex-shrink-0 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 ${
+            className={`inline-flex h-10 flex-shrink-0 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition focus:outline-none ${
               showFilters
-                ? "border-[#18181B] bg-[#F4F4F5] text-[#18181B]"
-                : "border-[#E4E4E7] bg-white text-[#18181B] hover:border-[#18181B] hover:bg-[#FAFAFA]"
+                ? "border-zinc-300 bg-zinc-50 text-zinc-900"
+                : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
             }`}
           >
             <SlidersHorizontal size={16} />
             Filters
             {activeFilters > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#18181B] text-[11px] font-bold text-white">
-                {activeFilters}
-              </span>
+              <span className="text-xs text-zinc-400">({activeFilters})</span>
             )}
           </button>
         </div>
 
-        {/* Subject chips */}
+        {/* ── Subject chips ── */}
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {SUBJECTS.map((s) => (
             <Chip
@@ -130,23 +127,23 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
           ))}
         </div>
 
-        {/* Advanced filters */}
+        {/* ── Advanced filters ── */}
         {showFilters && (
-          <div className="rounded-xl border border-[#E4E4E7] bg-white p-5 shadow-sm space-y-5">
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 ["Type", type, setType, TYPES],
                 ["Board", board, setBoard, BOARDS],
                 ["City", city, setCity, CITIES],
               ].map(([label, val, setter, opts]) => (
                 <div key={label as string}>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#71717A]">
+                  <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide">
                     {label as string}
                   </label>
                   <select
                     value={val as string}
                     onChange={(e) => (setter as (v: string) => void)(e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-[#E4E4E7] bg-white px-3 py-2.5 text-sm text-[#18181B] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
+                    className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
                   >
                     {(opts as string[]).map((o) => (
                       <option key={o} value={o}>
@@ -157,13 +154,13 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
                 </div>
               ))}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#71717A]">
+                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide">
                   Sort By
                 </label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-[#E4E4E7] bg-white px-3 py-2.5 text-sm text-[#18181B] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
+                  className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
                 >
                   {[
                     ["createdAt", "Most Recent"],
@@ -186,7 +183,7 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
                   setBoard("All Boards");
                   setCity("All Cities");
                 }}
-                className="text-sm font-medium text-[#18181B] underline underline-offset-2 hover:no-underline"
+                className="text-sm font-medium text-zinc-600 underline underline-offset-2 hover:text-zinc-900"
               >
                 Clear all filters
               </button>
@@ -194,7 +191,7 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
           </div>
         )}
 
-        {/* Results */}
+        {/* ── Results ── */}
         {loading ? (
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
@@ -203,7 +200,7 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
           </div>
         ) : listings.length === 0 ? (
           <EmptyState
-            icon={<PackageOpen size={32} className="text-[#A1A1AA]" />}
+            icon={<PackageOpen size={32} className="text-zinc-300" />}
             title="No resources found"
             desc="Try adjusting filters or request this resource"
           />
