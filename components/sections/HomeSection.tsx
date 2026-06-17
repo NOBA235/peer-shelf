@@ -217,14 +217,15 @@ export default function HomeSection({
           margin-bottom: 0.5rem;
         }
         .hero-avatars div {
-          width: 1.75rem;
-          height: 1.75rem;
+          width: 3.75rem;
+          height: 3.75rem;
           border-radius: 50%;
           border: 2px solid #FAFAFA;
           overflow: hidden;
           background: #F4F4F5;
           margin-right: -0.5rem;
           position: relative;
+          align-items: center;
         }
         .hero-title {
           font-size: 1.5rem;
@@ -677,7 +678,7 @@ export default function HomeSection({
                       alt={`Member ${idx + 1}`}
                       fill
                       className="object-cover"
-                      sizes="32px"
+                      sizes="28px"
                     />
                   </div>
                 ))}

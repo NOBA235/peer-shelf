@@ -18,6 +18,25 @@ const EDGES = [
 export default function NetworkViz() {
   return (
     <div className="relative h-64 w-full select-none overflow-hidden rounded-xl border border-[#E4E4E7] bg-[#FAFAFA] sm:h-72">
+      {/* Embedded keyframe styles */}
+      <style>{`
+        @keyframes breathe {
+          0%, 100% { transform: scale(1); }
+          50%      { transform: scale(2); }
+        }
+        .animate-breathe {
+          animation: breathe 3s ease-in-out infinite;
+        }
+        @keyframes flow {
+          to { stroke-dashoffset: -8; }
+        }
+        .animate-flow {
+          stroke-dasharray: 4 4;
+          stroke-dashoffset: 0;
+          animation: flow 2s linear infinite;
+        }
+      `}</style>
+
       {/* Connection lines */}
       <svg
         className="absolute inset-0 h-full w-full"
@@ -34,6 +53,7 @@ export default function NetworkViz() {
             stroke="#D4D4D8"
             strokeWidth="0.4"
             opacity={0.7}
+            className="animate-flow"
           />
         ))}
       </svg>
@@ -52,7 +72,7 @@ export default function NetworkViz() {
             }}
           >
             <div
-              className="flex items-center justify-center rounded-full border border-[#E4E4E7] bg-white shadow-sm"
+              className="animate-breathe flex items-center justify-center rounded-full border border-[#E4E4E7] bg-white shadow-sm"
               style={{ width: n.size, height: n.size }}
             >
               <Icon size={n.size * 0.45} className="text-[#52525B]" />
