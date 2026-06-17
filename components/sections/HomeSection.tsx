@@ -677,16 +677,14 @@ export default function HomeSection({
                       alt={`Member ${idx + 1}`}
                       fill
                       className="object-cover"
-                      sizes="28px"
+                      sizes="32px"
                     />
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize: "0.75rem", color: "#71717A", marginLeft: "0.25rem" }}>
-                Joined by students in Nagaland
-              </p>
+              
               <h1 className="hero-title">
-                Find books & peers within your community
+                Find books & peerlancers within your community
               </h1>
               <p className="hero-desc">
                 Affordable textbooks, student mentors, shared notes — everything
@@ -697,7 +695,7 @@ export default function HomeSection({
                   Browse Resources →
                 </button>
                 <button onClick={onScan} className="hero-outline">
-                  📷 Scan a Book
+                  Scan a Book
                 </button>
               </div>
               <p className="hero-free-text">Free · No sign-up required</p>
