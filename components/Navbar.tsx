@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Avatar } from "./ui";
+import Logo from "@/components/Logo";
 import {
   fetchNotifications,
   markAllNotificationsRead,
@@ -81,12 +82,7 @@ export default function Navbar({ onScan, activeTab, onTabChange }: Props) {
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#18181B] text-white">
-            <BookOpen size={18} />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-[#18181B]">
-            Peer<span className="text-[#71717A]">&</span>Shelf
-          </span>
+          <Logo size={32} />
         </div>
 
         {/* Right actions */}
