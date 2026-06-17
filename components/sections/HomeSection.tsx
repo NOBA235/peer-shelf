@@ -257,7 +257,7 @@ export default function HomeSection({
         }
         .hero-cta {
           border-radius: 0.5rem;
-          background: #18181B;
+          background:#2563EB;
           border: none;
           padding: 0.625rem 1.25rem;
           font-size: 0.875rem;
