@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { STATS, ROADMAP } from "@/lib/data";
+import { ROADMAP } from "@/lib/data";
 import { fetchListings, fetchMentors, ListingDoc, MentorDoc } from "@/lib/api";
 import { Badge, Avatar, StarRating, Skeleton } from "../ui";
 import NetworkViz from "../NetworkViz";
@@ -10,49 +10,20 @@ import MentorCard from "../MentorCard";
 import { Listing, Mentor } from "@/lib/data";
 
 interface Props {
-  onTabChange: (t: string) => void;
+  onTabChange:    (t: string) => void;
   onListingClick: (l: Listing) => void;
-  onMentorClick: (m: Mentor) => void;
-  onScan: () => void;
-  onWishlist: () => void;
+  onMentorClick:  (m: Mentor) => void;
+  onScan:         () => void;
+  onWishlist:     () => void;
 }
 
-/* ── Animated stat counter */
-function Counter({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const started = useRef(false);
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !started.current) {
-          started.current = true;
-          const t0 = Date.now();
-          const tick = () => {
-            const p = Math.min((Date.now() - t0) / 1800, 1);
-            setCount(Math.floor((1 - Math.pow(1 - p, 3)) * target));
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [target]);
-
-  return <span ref={ref}>{count.toLocaleString()}</span>;
-}
-
-/* ── Combined search — real MongoDB queries ───────────── */
+/* ── Combined search ──────────────────────────────────── */
 function CombinedSearch() {
-  const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [query,    setQuery]    = useState("");
+  const [loading,  setLoading]  = useState(false);
   const [searched, setSearched] = useState(false);
-  const [books, setBooks] = useState<ListingDoc[]>([]);
-  const [mentors, setMentors] = useState<MentorDoc[]>([]);
+  const [books,    setBooks]    = useState<ListingDoc[]>([]);
+  const [mentors,  setMentors]  = useState<MentorDoc[]>([]);
 
   const search = async () => {
     if (!query.trim()) return;
@@ -74,30 +45,30 @@ function CombinedSearch() {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col sm:flex-row gap-2">
+    <div className="space-y-4">
+      <div className="flex gap-2">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && search()}
-          placeholder="e.g. Physics, NCERT Chemistry, Organic…"
-          className="flex-1 rounded-md border border-[#E4E4E7] bg-white px-4 py-2.5 text-[#18181B] placeholder:text-[#71717A] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
+          placeholder="Physics, NCERT Chemistry, Organic…"
+          className="flex-1 rounded-lg border border-[#E4E4E7] bg-white px-4 py-2.5 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
         />
         <button
           onClick={search}
           disabled={loading}
-          className="h-11 min-w-[88px] rounded-md bg-[#18181B] px-5 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 disabled:opacity-50"
+          className="rounded-lg bg-[#18181B] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:opacity-40"
         >
           {loading ? "…" : "Search"}
         </button>
       </div>
 
       {loading && (
-        <div className="flex justify-center gap-1.5 py-4">
+        <div className="flex items-center gap-1.5 py-2">
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-2 w-2 animate-bounce rounded-full bg-[#18181B]"
+              className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#A1A1AA]"
               style={{ animationDelay: `${i * 0.15}s` }}
             />
           ))}
@@ -105,66 +76,58 @@ function CombinedSearch() {
       )}
 
       {searched && !loading && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {books.length > 0 && (
-            <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">
-                📚 Listings ({books.length})
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#A1A1AA]">
+                Books ({books.length})
               </p>
-              <div className="mt-2 space-y-2">
-                {books.map((b) => (
-                  <div
-                    key={b._id}
-                    className="flex cursor-pointer items-center gap-3 rounded-md border border-[#E4E4E7] bg-white p-3 transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
-                  >
-                    <span className="text-2xl">{b.image}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="line-clamp-1 text-sm font-medium text-[#18181B]">
-                        {b.title}
-                      </p>
-                      <p className="text-xs text-[#71717A]">
-                        {b.price === 0 ? "Free" : `₹${b.price}`} · {b.condition} · {b.city}
-                      </p>
-                    </div>
-                    <span className="text-sm font-bold text-[#18181B]">
-                      {b.price === 0 ? "Free" : `₹${b.price}`}
-                    </span>
+              {books.map((b) => (
+                <div
+                  key={b._id}
+                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-[#E4E4E7] bg-white px-4 py-3 transition hover:border-[#18181B]"
+                >
+                  <span className="text-xl leading-none">{b.image}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-[#18181B]">{b.title}</p>
+                    <p className="text-xs text-[#71717A]">{b.condition} · {b.city}</p>
                   </div>
-                ))}
-              </div>
+                  <span className="shrink-0 text-sm font-semibold text-[#18181B]">
+                    {b.price === 0 ? "Free" : `₹${b.price}`}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
+
           {mentors.length > 0 && (
-            <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">
-                🌟 Mentors ({mentors.length})
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#A1A1AA]">
+                Mentors ({mentors.length})
               </p>
-              <div className="mt-2 space-y-2">
-                {mentors.map((m) => (
-                  <div
-                    key={m._id}
-                    className="flex cursor-pointer items-center gap-3 rounded-md border border-[#E4E4E7] bg-white p-3 transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
-                  >
-                    <Avatar initials={m.initials} size="sm" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-[#18181B]">{m.name}</p>
-                      <p className="text-xs text-[#71717A]">{m.achievement}</p>
-                    </div>
-                    <StarRating rating={m.rating} />
+              {mentors.map((m) => (
+                <div
+                  key={m._id}
+                  className="flex cursor-pointer items-center gap-3 rounded-lg border border-[#E4E4E7] bg-white px-4 py-3 transition hover:border-[#18181B]"
+                >
+                  <Avatar initials={m.initials} size="sm" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-[#18181B]">{m.name}</p>
+                    <p className="truncate text-xs text-[#71717A]">{m.achievement}</p>
                   </div>
-                ))}
-              </div>
+                  <StarRating rating={m.rating} />
+                </div>
+              ))}
             </div>
           )}
+
           {books.length === 0 && mentors.length === 0 && (
-            <div className="py-6 text-center">
-              <p className="text-sm text-[#52525B]">
-                No results —{" "}
-                <span className="cursor-pointer font-medium text-[#18181B] underline underline-offset-2">
-                  request this resource
-                </span>
-              </p>
-            </div>
+            <p className="text-sm text-[#71717A]">
+              Nothing found.{" "}
+              <span className="cursor-pointer font-medium text-[#18181B] underline underline-offset-2">
+                Request this resource →
+              </span>
+            </p>
           )}
         </div>
       )}
@@ -172,7 +135,6 @@ function CombinedSearch() {
   );
 }
 
-/* ── Main Home Section ─ */
 export default function HomeSection({
   onTabChange,
   onListingClick,
@@ -181,9 +143,9 @@ export default function HomeSection({
   onWishlist,
 }: Props) {
   const [featuredListings, setFeaturedListings] = useState<ListingDoc[]>([]);
-  const [featuredMentors, setFeaturedMentors] = useState<MentorDoc[]>([]);
-  const [loadingFeatured, setLoadingFeatured] = useState(true);
-  const [showRoadmap, setShowRoadmap] = useState(false);
+  const [featuredMentors,  setFeaturedMentors]  = useState<MentorDoc[]>([]);
+  const [loadingFeatured,  setLoadingFeatured]  = useState(true);
+  const [showRoadmap,      setShowRoadmap]       = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -204,301 +166,263 @@ export default function HomeSection({
   ];
 
   return (
-  <div className="min-h-screen w-full bg-[#FAFAFA] px-4 py-16 text-[#18181B] sm:px-6 sm:py-28 lg:px-8">
-  <div className="w-full space-y-20 sm:space-y-32 lg:space-y-40">
-        <section className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 lg:gap-16">
-          {/* Left column */}
-          <div className="space-y-5 text-center md:text-left">
-            {/* Small circular avatars + social proof */}
-            <div className="flex items-center justify-center md:justify-start -space-x-2">
-              {communityImages.map((src, idx) => (
-                <div
-                  key={idx}
-                  className="relative h-20 w-20 sm:h-12 sm:w-12 rounded-full border-2 border-white bg-gray-100 shadow-sm overflow-hidden"
-                >
-                  <Image
-                    src={src}
-                    alt={`Community member ${idx + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 40px, 48px"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-2xl lg:text-2xl">
-              Find Your Peers{" "}
-              <span className="text-[#18181B]"></span>
-            </h1>
-             <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#18181B] sm:text-2xl lg:text-2xl">
-              And used books within your campus{" "}
-             
-            </h1>
-
-
-            <p className="mx-auto max-w-lg text-base text-[#52525B] md:mx-0">
-              Discover affordable textbooks, connect with mentors, share notes, and unlock
-              educational resources hidden within your community.
-            </p>
-<div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:justify-start">
-  <button
-    onClick={() => onTabChange("marketplace")}
-    className="h-10 w-full rounded-md bg-[#18181B] px-5 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
-  >
-    Browse Resources →
-  </button>
-  <button
-    onClick={onScan}
-    className="h-10 w-full rounded-md border border-[#E4E4E7] bg-white px-5 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
-  >
-    📷 Scan a Book
-  </button>
-</div>
-            <p className="text-sm text-[#71717A]">Free to use · No sign‑up required</p>
-
-            {/* Stats grid – same as before */}
-            <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4 sm:gap-4">
-              {STATS.map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-md border border-[#E4E4E7] bg-white p-3 text-center sm:p-4"
-                >
-                  <div className="mb-1 text-xl sm:text-2xl">{s.icon}</div>
-                  <div className="text-lg font-bold text-[#18181B] sm:text-xl">
-                    <Counter target={s.value} />+
+    <div className="container-app bg-[#FAFAFA] text-[#18181B]">
+      {/* ── HERO ──────────────────────────────────── */}
+      <section className="section-pad">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center md:gap-12">
+          <div className="space-y-5 max-w-prose">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                {communityImages.map((src, idx) => (
+                  <div
+                    key={idx}
+                    className="relative h-7 w-7 overflow-hidden rounded-full border-2 border-[#FAFAFA] bg-gray-100"
+                  >
+                    <Image
+                      src={src}
+                      alt={`Community member ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="28px"
+                    />
                   </div>
-                  <div className="text-xs text-[#71717A]">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right column – always visible from md upwards, spacious network card */}
-          <div className="flex justify-center md:justify-end">
-            <div className="w-full max-w-md rounded-xl border border-[#E4E4E7] bg-white p-6 sm:p-8">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-[#18181B]">Knowledge Network</p>
-                <Badge color="emerald">● Live</Badge>
+                ))}
               </div>
-              <p className="mt-1 text-sm text-[#52525B]">
-                Resources flowing through student communities
-              </p>
-              <div className="mt-6">
-                <NetworkViz />
-              </div>
+              <p className="text-xs text-[#71717A]">Joined by students in Nagaland</p>
             </div>
-          </div>
-        </section>
 
-        {/* ── How it works ─────────────────────────────────── */}
-        <section className="space-y-8">
-          <div className="space-y-2 text-center">
-            <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">How It Works</p>
-            <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
-              4 steps to unlock resources
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["📸", "Scan a Textbook", "Point camera at any book cover"],
-              ["🤖", "Vision OCR Reads It", "Google Vision + Open Library fetch real metadata"],
-              ["📋", "List or Donate", "Set price, swap terms, or give free"],
-              ["🤝", "Get Matched", "Connect with students who need it"],
-            ].map(([icon, title, desc], i) => (
-              <div
-                key={i}
-                className="relative rounded-xl border border-[#E4E4E7] bg-white p-5 transition hover:border-[#18181B] sm:p-6"
+            <h1 className="text-xl font-bold leading-snug tracking-tight sm:text-2xl lg:text-3xl">
+              Find books &amp; peers within your community
+            </h1>
+
+            <p className="text-sm leading-relaxed text-[#52525B]">
+              Affordable textbooks, student mentors, shared notes — everything
+              hidden inside your community, now in one place.
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => onTabChange("marketplace")}
+                className="rounded-lg bg-[#18181B] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
               >
-                <div className="absolute right-4 top-4 text-4xl font-black text-[#E4E4E7] select-none">
-                  {String(i + 1).padStart(2, "0")}
-                </div>
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md border border-[#E4E4E7] bg-[#FAFAFA] text-xl sm:h-11 sm:w-11 sm:text-2xl">
-                  {icon}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#18181B]">{title}</p>
-                  <p className="mt-1 text-sm text-[#52525B]">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+                Browse Resources →
+              </button>
+              <button
+                onClick={onScan}
+                className="rounded-lg border border-[#E4E4E7] bg-white px-4 py-2 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+              >
+                📷 Scan a Book
+              </button>
+            </div>
 
-        {/* ── Search ─────────────────────────────────────────── */}
-        <section className="space-y-5">
+            <p className="text-xs text-[#A1A1AA]">Free · No sign-up required</p>
+          </div>
+
+          <div className="rounded-xl border border-[#E4E4E7] bg-white p-5">
+            <div className="mb-1 flex items-center justify-between">
+              <p className="text-sm font-semibold text-[#18181B]">Knowledge Network</p>
+              <Badge color="emerald">● Live</Badge>
+            </div>
+            <p className="mb-4 text-xs text-[#71717A]">
+              Resources flowing through student communities
+            </p>
+            <NetworkViz />
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ──────────────────────────── */}
+      <section className="section-pad">
+        <div className="mb-7">
+          <p className="section-label">How It Works</p>
+          <h2 className="heading-lg">From scan to connected in minutes</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            ["📸", "Scan a Textbook",  "Point your camera at any book cover"],
+            ["🤖", "OCR Reads It",     "Vision + Open Library fetch metadata instantly"],
+            ["📋", "List or Donate",   "Set a price, swap, or give it free"],
+            ["🤝", "Get Matched",      "Connect with students who need it most"],
+          ].map(([icon, title, desc], i) => (
+            <div
+              key={i}
+              className="rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B]"
+            >
+              <p className="mb-3 text-xs font-semibold text-[#D4D4D8]">
+                {String(i + 1).padStart(2, "0")}
+              </p>
+              <div className="mb-2 text-lg">{icon}</div>
+              <p className="text-xs font-semibold text-[#18181B]">{title}</p>
+              <p className="mt-1 text-xs text-[#71717A] leading-snug">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── SEARCH ────────────────────────────────── */}
+      <section className="section-pad">
+        <div className="mb-6">
+          <p className="section-label">Search</p>
+          <h2 className="heading-lg">Find books &amp; mentors in one go</h2>
+          <p className="body-sm mt-1">One query across all listings and mentor profiles.</p>
+        </div>
+        <CombinedSearch />
+      </section>
+
+      {/* ── FEATURED LISTINGS ──────────────────────── */}
+      <section className="section-pad">
+        <div className="mb-6 flex items-end justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Search</p>
-            <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
-              Find books &amp; mentors together
-            </h2>
-            <p className="mt-1 text-base text-[#52525B]">
-              One search across listings and mentor profiles in MongoDB.
-            </p>
+            <p className="section-label">Marketplace</p>
+            <h2 className="heading-lg">Featured Resources</h2>
           </div>
-          <CombinedSearch />
-        </section>
+          <button
+            onClick={() => onTabChange("marketplace")}
+            className="shrink-0 text-sm font-medium text-[#18181B] underline underline-offset-2 hover:no-underline"
+          >
+            View all →
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {loadingFeatured
+            ? [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 rounded-xl" />)
+            : featuredListings.length === 0
+            ? <p className="col-span-full text-sm text-[#71717A]">No listings yet — be the first to add one.</p>
+            : featuredListings.map((l) => (
+                <ListingCard
+                  key={l._id}
+                  listing={{ ...l, id: l._id } as unknown as Listing}
+                  onClick={onListingClick}
+                />
+              ))}
+        </div>
+      </section>
 
-        {/* ── Featured Listings ─────────────────────────────── */}
-        <section className="space-y-6">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Marketplace</p>
-              <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">Featured Resources</h2>
-            </div>
-            <button
-              onClick={() => onTabChange("marketplace")}
-              className="text-sm font-medium text-[#18181B] underline underline-offset-2 hover:no-underline"
-            >
-              View all →
-            </button>
+      {/* ── TOP MENTORS ──────────────────────────────── */}
+      <section className="section-pad">
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <p className="section-label">Mentorship Hub</p>
+            <h2 className="heading-lg">Top Mentors</h2>
           </div>
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {loadingFeatured
-              ? [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 rounded-xl" />)
-              : featuredListings.length === 0
-              ? <p className="text-sm text-[#71717A] col-span-full">No listings yet — be the first to add one.</p>
-              : featuredListings.map((l) => (
-                  <ListingCard
-                    key={l._id}
-                    listing={{ ...l, id: l._id } as unknown as Listing}
-                    onClick={onListingClick}
-                  />
-                ))}
-          </div>
-        </section>
+          <button
+            onClick={() => onTabChange("mentors")}
+            className="shrink-0 text-sm font-medium text-[#18181B] underline underline-offset-2 hover:no-underline"
+          >
+            View all →
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {loadingFeatured
+            ? [1, 2].map((i) => <Skeleton key={i} className="h-40 rounded-xl" />)
+            : featuredMentors.length === 0
+            ? <p className="text-sm text-[#71717A]">No mentors yet.</p>
+            : featuredMentors.map((m) => (
+                <MentorCard
+                  key={m._id}
+                  mentor={{ ...m, id: m._id } as unknown as Mentor}
+                  onClick={onMentorClick}
+                />
+              ))}
+        </div>
+      </section>
 
-        {/* ── Top Mentors ───────────────────────────────────── */}
-        <section className="space-y-6">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Mentorship Hub</p>
-              <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">Top Mentors</h2>
-            </div>
-            <button
-              onClick={() => onTabChange("mentors")}
-              className="text-sm font-medium text-[#18181B] underline underline-offset-2 hover:no-underline"
-            >
-              View all →
-            </button>
-          </div>
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {loadingFeatured
-              ? [1, 2].map((i) => <Skeleton key={i} className="h-48 rounded-xl" />)
-              : featuredMentors.length === 0
-              ? <p className="text-sm text-[#71717A] col-span-full">No mentors yet.</p>
-              : featuredMentors.map((m) => (
-                  <MentorCard
-                    key={m._id}
-                    mentor={{ ...m, id: m._id } as unknown as Mentor}
-                    onClick={onMentorClick}
-                  />
-                ))}
-          </div>
-        </section>
-
-        {/* ── CTA Banner ────────────────────────────────────── */}
-        <section className="rounded-xl border border-[#E4E4E7] bg-white p-8 text-center sm:p-12">
-          <div className="space-y-3">
-            <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Get started</p>
-            <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
-              Have books you no longer need?
-            </h2>
-            <p className="mx-auto max-w-md text-base text-[#52525B]">
-              Help a student who needs them — scan, list, and share your knowledge.
-            </p>
-          </div>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+      {/* ── CTA BANNER ─────────────────────────────── */}
+      <section className="section-pad">
+        <div className="glass text-center">
+          <p className="section-label">Get Started</p>
+          <h2 className="heading-lg">Have books collecting dust?</h2>
+          <p className="body-md mx-auto max-w-sm mt-2">
+            Scan, list, and pass them on. A student nearby needs exactly what
+            you’ve already read.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
             <button
               onClick={onScan}
-              className="h-11 w-full rounded-md bg-[#18181B] px-6 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
+              className="rounded-lg bg-[#18181B] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
             >
               📷 Scan &amp; List Now
             </button>
             <button
               onClick={onWishlist}
-              className="h-11 w-full rounded-md border border-[#E4E4E7] bg-white px-6 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 sm:w-auto"
+              className="rounded-lg border border-[#E4E4E7] bg-white px-5 py-2 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
             >
               Request a Book
             </button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── Roadmap – collapsible ──────────────────────────── */}
-        <section className="space-y-6">
-          <div className="space-y-2 text-center">
-            <p className="text-xs font-medium uppercase tracking-widest text-[#71717A]">Platform Roadmap</p>
-            <h2 className="text-2xl font-bold text-[#18181B] sm:text-3xl">
-              What&apos;s coming next
-            </h2>
+      {/* ── ROADMAP ────────────────────────────────── */}
+      <section className="section-pad">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <p className="section-label">Roadmap</p>
+            <h2 className="heading-lg">What&apos;s coming next</h2>
           </div>
-          <div className="text-center">
-            <button
-              onClick={() => setShowRoadmap(!showRoadmap)}
-              className="inline-flex items-center gap-1 rounded-md border border-[#E4E4E7] bg-white px-5 py-2.5 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
-            >
-              {showRoadmap ? "Hide roadmap ▲" : "View roadmap ▼"}
-            </button>
-          </div>
-          {showRoadmap && (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mt-6">
-              {ROADMAP.map((r) => {
-                const statusMap: Record<string, { label: string; bg: string; text: string }> = {
-                  next: { label: "Up next", bg: "bg-emerald-50", text: "text-emerald-700" },
-                  soon: { label: "Soon", bg: "bg-[#F4F4F5]", text: "text-[#52525B]" },
-                  later: { label: "Later", bg: "bg-[#F4F4F5]", text: "text-[#71717A]" },
-                };
-                const status = statusMap[r.status] || statusMap.later;
-                return (
-                  <div
-                    key={r.title}
-                    className="flex items-start gap-3 rounded-xl border border-[#E4E4E7] bg-white p-5 transition hover:border-[#18181B]"
-                  >
-                    <span className="text-2xl">{r.icon}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-[#18181B]">{r.title}</p>
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}
-                        >
-                          {status.label}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-sm text-[#52525B]">{r.desc}</p>
+          <button
+            onClick={() => setShowRoadmap(!showRoadmap)}
+            className="shrink-0 rounded-lg border border-[#E4E4E7] bg-white px-3 py-1.5 text-sm font-medium text-[#18181B] transition hover:border-[#18181B]"
+          >
+            {showRoadmap ? "Collapse ▲" : "Expand ▼"}
+          </button>
+        </div>
+
+        {showRoadmap && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {ROADMAP.map((r) => {
+              const statusMap: Record<string, { label: string; bg: string; text: string }> = {
+                next:  { label: "Up next", bg: "bg-emerald-50", text: "text-emerald-700" },
+                soon:  { label: "Soon",    bg: "bg-[#F4F4F5]",  text: "text-[#52525B]"  },
+                later: { label: "Later",   bg: "bg-[#F4F4F5]",  text: "text-[#71717A]"  },
+              };
+              const status = statusMap[r.status] || statusMap.later;
+              return (
+                <div
+                  key={r.title}
+                  className="flex items-start gap-3 rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B]"
+                >
+                  <span className="mt-0.5 text-base">{r.icon}</span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-[#18181B]">{r.title}</p>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}>
+                        {status.label}
+                      </span>
                     </div>
+                    <p className="mt-1 text-xs leading-snug text-[#71717A]">{r.desc}</p>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
-        {/* ── Footer ────────────────────────────────────────── */}
-        <footer className="border-t border-[#E4E4E7] pt-10 text-center">
-          <div className="flex items-center justify-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#18181B] text-sm text-white">
+      {/* ── FOOTER ─────────────────────────────────── */}
+      <footer className="section-pad border-t border-[#E4E4E7]">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[#18181B] text-xs text-white">
               📚
             </div>
-            <span className="text-lg font-bold text-[#18181B]">
-              Peer<span className="text-[#52525B]">&</span>Shelf
+            <span className="text-sm font-bold text-[#18181B]">
+              Peer<span className="text-[#71717A]">&</span>Shelf
             </span>
           </div>
-          <p className="mx-auto mt-2 max-w-xs text-sm text-[#52525B]">
-            Unlocking educational resources hidden within student communities.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-6">
+          <div className="flex flex-wrap justify-center gap-5">
             {["About", "Contact", "Privacy", "Terms", "Roadmap"].map((l) => (
               <span
                 key={l}
-                className="cursor-pointer text-xs font-medium uppercase tracking-wider text-[#71717A] transition hover:text-[#18181B]"
+                className="cursor-pointer text-xs text-[#71717A] transition hover:text-[#18181B]"
               >
                 {l}
               </span>
             ))}
           </div>
-          <p className="mt-8 text-xs text-[#71717A]/60">© 2025 Peer &amp; Shelf</p>
-        </footer>
-      </div>
+          <p className="text-xs text-[#A1A1AA]">© 2025 Peer &amp; Shelf</p>
+        </div>
+      </footer>
     </div>
   );
 }
