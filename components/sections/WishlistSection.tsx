@@ -2,15 +2,16 @@
 import { useState, useEffect } from "react";
 import { fetchWishlist, deleteWishlistItem, WishlistDoc } from "@/lib/api";
 import { Badge, Skeleton, EmptyState, SectionLabel } from "../ui";
+import { CheckCircle2, Circle, Clock, Plus, Trash2, ChevronRight, Sparkles, Eye } from "lucide-react";
 
 interface Props {
   onRequest: () => void;
 }
 
-const STATUS_CFG = {
-  match: { label: "✓ Match Found", color: "emerald" as const },
-  potential: { label: "~ Potential Match", color: "amber" as const },
-  searching: { label: "⟳ Searching", color: "blue" as const },
+const STATUS_CFG: Record<string, { label: string; color: "emerald" | "amber" | "blue" }> = {
+  match:     { label: "Match Found",     color: "emerald" },
+  potential: { label: "Potential Match", color: "amber" },
+  searching: { label: "Searching",       color: "blue" },
 };
 
 export default function WishlistSection({ onRequest }: Props) {
@@ -27,84 +28,88 @@ export default function WishlistSection({ onRequest }: Props) {
   const remove = async (id: string) => {
     try {
       await deleteWishlistItem(id);
-      setItems((p) => p.filter((i) => i._id !== id));
+      setItems((prev) => prev.filter((i) => i._id !== id));
     } catch {
       /* ignore */
     }
   };
 
-  const matched = items.filter((i) => i.status !== "searching");
+  const matchedCount = items.filter((i) => i.status === "match").length;
+  const potentialCount = items.filter((i) => i.status === "potential").length;
+  const searchingCount = items.filter((i) => i.status === "searching").length;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 py-8 text-[#18181B] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <div className="min-h-screen bg-[#FAFAFA] px-4 py-12 text-[#18181B] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl space-y-8">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <SectionLabel>Resource Matching</SectionLabel>
-            <h1 className="text-[30px] font-bold leading-[38px] tracking-tight text-[#18181B] md:text-[36px] md:leading-[44px]">
-              My Wishlist
+            <h1 className="mt-1 text-3xl font-bold tracking-tight text-[#18181B] sm:text-4xl">
+              Your Wishlist
             </h1>
-            <p className="mt-0.5 text-sm text-[#52525B]">
-              Resources you&apos;re looking for
+            <p className="mt-1 text-sm text-[#52525B]">
+              Resources you&apos;re looking for — we&apos;ll notify when matched.
             </p>
           </div>
           <button
             onClick={onRequest}
-            className="h-10 rounded-md bg-[#18181B] px-4 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#18181B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
           >
-            + Request
+            <Plus size={16} />
+            Request a Resource
           </button>
         </div>
 
-        {/* Match found alert */}
-        {items.some((i) => i.status === "match") && (
-          <div className="flex items-center gap-3 rounded-xl border border-[#E4E4E7] bg-white p-4">
-            <span className="text-2xl">🎉</span>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-[#18181B]">Match Found!</p>
-              <p className="text-sm text-[#52525B]">
-                {items.find((i) => i.status === "match")?.matchName} has your resource nearby
-              </p>
-            </div>
-            <button className="flex-shrink-0 text-sm font-medium text-[#18181B] underline underline-offset-2 hover:no-underline">
-              View →
-            </button>
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Quick stats */}
+        <div className="grid grid-cols-3 gap-3 text-center">
           {[
-            ["Total", items.length, "📋"],
-            ["Matched", matched.length, "✅"],
-            ["Searching", items.filter((i) => i.status === "searching").length, "🔍"],
-          ].map(([l, v, icon]) => (
+            { count: matchedCount, label: "Matched", icon: CheckCircle2, color: "text-emerald-600" },
+            { count: potentialCount, label: "Potential", icon: Eye, color: "text-amber-600" },
+            { count: searchingCount, label: "Searching", icon: Clock, color: "text-blue-600" },
+          ].map((stat) => (
             <div
-              key={l as string}
-              className="rounded-md border border-[#E4E4E7] bg-white p-4 text-center"
+              key={stat.label}
+              className="rounded-xl border border-[#E4E4E7] bg-white p-4"
             >
-              <div className="mb-1 text-2xl">{icon}</div>
-              <div className="text-xl font-bold text-[#18181B]">{v}</div>
-              <div className="mt-0.5 text-xs text-[#71717A]">{l}</div>
+              <stat.icon className={`mx-auto mb-1 h-5 w-5 ${stat.color}`} />
+              <p className="text-lg font-bold text-[#18181B]">{stat.count}</p>
+              <p className="text-xs text-[#71717A]">{stat.label}</p>
             </div>
           ))}
         </div>
 
+        {/* Match alert banner */}
+        {items.some((i) => i.status === "match") && (
+          <div className="flex items-center gap-4 rounded-xl border border-emerald-200 bg-emerald-50/50 px-5 py-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+              <Sparkles size={20} className="text-emerald-700" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-emerald-800">Match found!</p>
+              <p className="text-xs text-emerald-700">
+                {items.find((i) => i.status === "match")?.matchName} has a resource you need.
+              </p>
+            </div>
+            <ChevronRight size={18} className="text-emerald-600" />
+          </div>
+        )}
+
+        {/* Content */}
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-24 rounded-xl" />
+              <Skeleton key={i} className="h-28 rounded-xl" />
             ))}
           </div>
         ) : items.length === 0 ? (
           <EmptyState
-            icon="🔖"
+            icon={<Sparkles size={32} className="text-[#A1A1AA]" />}
             title="Your wishlist is empty"
-            desc="Request resources and we'll match you with nearby students"
+            desc="Request a textbook or notes and we'll instantly search for nearby matches."
           />
         ) : (
-          <div className="space-y-3">
+          <ul className="space-y-4">
             {items.map((item) => {
               const cfg = STATUS_CFG[item.status];
               const isMatch = item.status === "match";
@@ -112,14 +117,16 @@ export default function WishlistSection({ onRequest }: Props) {
               const isSearching = item.status === "searching";
 
               return (
-                <div
+                <li
                   key={item._id}
-                  className="rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B] space-y-3"
+                  className="rounded-xl border border-[#E4E4E7] bg-white p-5 transition hover:border-[#18181B]"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#18181B]">{item.title}</p>
-                      <div className="mt-1.5 flex flex-wrap gap-1">
+                      <h3 className="text-sm font-semibold text-[#18181B] truncate">
+                        {item.title}
+                      </h3>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
                         <Badge color="violet">{item.subject}</Badge>
                         <Badge color="blue">{item.curriculum}</Badge>
                         <Badge color="slate">{item.grade}</Badge>
@@ -128,62 +135,63 @@ export default function WishlistSection({ onRequest }: Props) {
                         Added {item.addedDaysAgo}d ago
                       </p>
                     </div>
-                    <div className="flex flex-shrink-0 flex-col items-end gap-2">
+                    <div className="flex flex-col items-end gap-2">
                       <Badge color={cfg.color}>{cfg.label}</Badge>
                       <button
                         onClick={() => remove(item._id)}
-                        className="text-xs text-[#71717A] transition hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 rounded"
+                        className="text-xs text-[#A1A1AA] hover:text-rose-600 transition rounded focus:outline-none"
                       >
-                        Remove
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
 
+                  {/* Match highlight */}
                   {isMatch && item.matchName && (
-                    <div className="flex items-center gap-2 rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-3">
-                      <span>🎉</span>
+                    <div className="mt-3 flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3">
+                      <CheckCircle2 size={18} className="text-emerald-600 flex-shrink-0" />
                       <div className="flex-1">
-                        <p className="text-xs font-semibold text-emerald-700">
+                        <p className="text-sm font-medium text-emerald-800">
                           {item.matchName} has this resource
                         </p>
                         {item.matchDistance && (
-                          <p className="text-xs text-[#71717A]">{item.matchDistance} away</p>
+                          <p className="text-xs text-emerald-700">{item.matchDistance} away</p>
                         )}
                       </div>
-                      <button className="text-xs font-medium text-[#18181B] underline underline-offset-2 hover:no-underline">
-                        Contact →
-                      </button>
+                      <ChevronRight size={16} className="text-emerald-600" />
                     </div>
                   )}
 
+                  {/* Potential matches */}
                   {isPotential && item.matchCount && (
-                    <div className="flex items-center gap-2 rounded-md border border-[#E4E4E7] bg-[#FAFAFA] p-3">
-                      <span>👀</span>
-                      <p className="flex-1 text-xs font-medium text-amber-700">
-                        {item.matchCount} potential listings found
+                    <div className="mt-3 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 px-4 py-3">
+                      <Eye size={18} className="text-amber-600 flex-shrink-0" />
+                      <p className="flex-1 text-sm font-medium text-amber-800">
+                        {item.matchCount} potential listing{item.matchCount > 1 ? "s" : ""} nearby
                       </p>
-                      <button className="text-xs font-medium text-[#18181B] underline underline-offset-2 hover:no-underline">
-                        View →
-                      </button>
+                      <ChevronRight size={16} className="text-amber-600" />
                     </div>
                   )}
 
+                  {/* Searching indicator */}
                   {isSearching && (
-                    <div className="flex items-center gap-2 text-xs text-[#71717A]">
-                      {[0, 1, 2].map((i) => (
-                        <div
-                          key={i}
-                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#18181B]"
-                          style={{ animationDelay: `${i * 0.15}s` }}
-                        />
-                      ))}
-                      Scanning network for matches…
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="flex gap-1">
+                        {[0, 1, 2].map((i) => (
+                          <div
+                            key={i}
+                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#A1A1AA]"
+                            style={{ animationDelay: `${i * 0.15}s` }}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs text-[#71717A]">Scanning network for matches…</p>
                     </div>
                   )}
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
         )}
       </div>
     </div>

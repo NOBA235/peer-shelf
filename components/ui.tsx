@@ -118,19 +118,21 @@ export const Divider = ({ className = "" }: { className?: string }) => (
   <hr className={`border-t border-[#E4E4E7] ${className}`} />
 );
 
-// ── Empty state ────────────────────────────────────────────────
+// ── Empty state ──
 export const EmptyState = ({
   icon,
   title,
   desc,
 }: {
-  icon: string;
+  icon: ReactNode;
   title: string;
   desc: string;
 }) => (
   <div className="py-16 text-center space-y-2">
-    <div className="mb-3 text-4xl">{icon}</div>
-    <p className="text-[24px] font-bold leading-[32px] text-[#18181B]">{title}</p>
+    <div className="mb-3 flex justify-center">{icon}</div>
+    <p className="text-[24px] font-bold leading-[32px] text-[#18181B]">
+      {title}
+    </p>
     <p className="text-sm text-[#52525B]">{desc}</p>
   </div>
 );

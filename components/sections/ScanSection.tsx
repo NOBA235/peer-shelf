@@ -1,89 +1,76 @@
 "use client";
+import { Camera, Zap, Upload } from "lucide-react";
 import { SectionLabel } from "../ui";
 
-interface Props { onOpenScanner: () => void; }
+interface Props {
+  onOpenScanner: () => void;
+}
 
 export default function ScanSection({ onOpenScanner }: Props) {
   return (
-    <div className="space-y-8 pt-8">
-      <div className="text-center space-y-2">
-        <SectionLabel>Powered by Google Cloud Vision + Open Library</SectionLabel>
-        <h1 className="heading-lg text-white">Book Scanner</h1>
-        <p className="body-md max-w-sm mx-auto">
-          Take a photo of any textbook. We OCR the cover, extract the ISBN,
-          and look up real metadata from Open Library.
-        </p>
-      </div>
+    <div className="flex flex-col items-center px-4 py-16 text-center sm:py-24">
+      {/* Badge / label */}
+      <SectionLabel>Book Scanner</SectionLabel>
 
-      {/* Tap target */}
-      <div
-        onClick={onOpenScanner}
-        className="relative overflow-hidden border-2 border-dashed border-violet-500/25 rounded-3xl h-56 sm:h-64 flex flex-col items-center justify-center cursor-pointer hover:border-violet-400 hover:bg-violet-500/4 transition-all group"
-      >
-        {[
-          ["top-3 left-3",    "border-t-2 border-l-2"],
-          ["top-3 right-3",   "border-t-2 border-r-2"],
-          ["bottom-3 left-3", "border-b-2 border-l-2"],
-          ["bottom-3 right-3","border-b-2 border-r-2"],
-        ].map(([pos, b], i) => (
-          <div key={i} className={`absolute ${pos} w-5 h-5 ${b} border-violet-500/40 rounded-sm`} />
-        ))}
-        <div className="w-20 h-20 bg-violet-600/15 group-hover:bg-violet-600/25 rounded-full flex items-center justify-center text-4xl transition-all group-hover:scale-110">
-          📸
-        </div>
-        <div className="text-center mt-4 space-y-1">
-          <p className="font-bold text-white">Tap to open camera or upload</p>
-          <p className="body-sm">Cover photo or ISBN barcode both work</p>
-        </div>
-      </div>
+      {/* Headline */}
+      <h1 className="mt-3 max-w-md text-2xl font-bold tracking-tight text-[#18181B] sm:text-3xl">
+        Scan any textbook, list it instantly
+      </h1>
+      <p className="mt-3 max-w-sm text-sm text-[#52525B]">
+        Point your camera at a book cover. We extract the title, author, and
+        let you set a price in under 30 seconds.
+      </p>
 
-      {/* Honest step-by-step */}
-      <div className="space-y-2">
-        <p className="caption uppercase tracking-widest">Exactly what happens</p>
-        {[
-          ["1", "Your photo is sent to Google Cloud Vision API",          "OCR extracts all visible text from the image"],
-          ["2", "We scan the text for an ISBN-10 or ISBN-13 number",     "Works from barcode area or printed text on cover"],
-          ["3", "ISBN is sent to Open Library (free, no key needed)",    "Returns real title, author, publisher, subjects"],
-          ["4", "If no ISBN found, we guess from the largest text lines","You can edit everything before publishing"],
-          ["5", "You review, adjust price + condition, then publish",     "Listing is saved to MongoDB and appears in marketplace"],
-        ].map(([step, title, desc]) => (
-          <div key={step as string} className="glass glass-hover p-4 flex gap-3">
-            <div className="w-7 h-7 rounded-full bg-violet-500/15 border border-violet-500/25 flex items-center justify-center caption font-bold text-violet-400 flex-shrink-0 mt-0.5">
-              {step}
-            </div>
-            <div>
-              <p className="body-sm font-medium text-white">{title}</p>
-              <p className="caption mt-0.5">{desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* What's needed */}
-      <div className="bg-blue-500/8 border border-blue-500/20 rounded-xl p-4 space-y-2">
-        <p className="body-sm font-semibold text-blue-300">What you need in .env.local</p>
-        <div className="space-y-1">
-          <div className="flex items-start gap-2">
-            <span className="caption text-blue-400 font-mono">GOOGLE_CLOUD_VISION_API_KEY</span>
-            <span className="caption">— Required for OCR</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="caption text-emerald-400 font-mono">Open Library API</span>
-            <span className="caption">— Free, no key needed</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="caption text-emerald-400 font-mono">MONGODB_URI</span>
-            <span className="caption">— Required to save the listing</span>
-          </div>
-        </div>
-      </div>
-
+      {/* Scan trigger */}
       <button
         onClick={onOpenScanner}
-        className="btn-primary w-full"
-        style={{ padding: "1rem" }}
+        className="group mt-10 flex w-full max-w-xs flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-[#D4D4D8] bg-white px-6 py-10 transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
       >
-        📷 Open Scanner
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F4F4F5] transition group-hover:bg-[#18181B]">
+          <Camera className="h-6 w-6 text-[#52525B] transition group-hover:text-white" />
+        </div>
+        <span className="text-sm font-semibold text-[#18181B]">
+          Tap to open camera or upload
+        </span>
+        <span className="text-xs text-[#71717A]">
+          Works with ISBN barcodes & cover photos
+        </span>
+      </button>
+
+      {/* How it works – 3 clean steps */}
+      <div className="mt-14 grid w-full max-w-lg grid-cols-1 gap-6 text-left sm:grid-cols-3 sm:text-center">
+        {[
+          {
+            icon: Camera,
+            title: "Snap a photo",
+            desc: "Take a picture of any textbook cover or barcode.",
+          },
+          {
+            icon: Zap,
+            title: "Instant metadata",
+            desc: "We read the ISBN, fetch real title & author details.",
+          },
+          {
+            icon: Upload,
+            title: "List in seconds",
+            desc: "Set price, condition, and publish. Done.",
+          },
+        ].map((step) => (
+          <div key={step.title}>
+            <step.icon className="h-6 w-6 text-[#18181B]" />
+            <h3 className="mt-2 text-sm font-semibold text-[#18181B]">{step.title}</h3>
+            <p className="mt-1 text-xs leading-relaxed text-[#71717A]">{step.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Primary CTA */}
+      <button
+        onClick={onOpenScanner}
+        className="mt-10 inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-xl bg-[#18181B] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+      >
+        <Camera size={18} />
+        Open Scanner
       </button>
     </div>
   );

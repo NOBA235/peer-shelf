@@ -2,26 +2,33 @@
 import { useState } from "react";
 import { Avatar } from "./ui";
 import { createWishlistItem, WishlistDoc } from "@/lib/api";
+import {
+  X,
+  Bookmark,
+  Search,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  MapPin,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
 
 interface Props {
   onClose: () => void;
   onCreated?: () => void;
 }
 
-const MSGS = [
-  "Querying MongoDB listings database…",
-  "Matching by subject and curriculum…",
-  "Filtering by board and grade…",
-  "Checking listing availability…",
-  "Sorting by best match…",
-];
-
 export default function WishlistModal({ onClose, onCreated }: Props) {
   const [stage, setStage] = useState<"form" | "searching" | "match">("form");
-  const [msgIdx, setMsgIdx] = useState(0);
   const [result, setResult] = useState<WishlistDoc | null>(null);
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ title: "", subject: "", curriculum: "", grade: "" });
+  const [form, setForm] = useState({
+    title: "",
+    subject: "",
+    curriculum: "",
+    grade: "",
+  });
 
   const submit = async () => {
     if (!form.title.trim()) {
@@ -30,170 +37,192 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
     }
     setError("");
     setStage("searching");
-    let i = 0;
-    const iv = setInterval(() => {
-      i++;
-      setMsgIdx(Math.min(i, MSGS.length - 1));
-      if (i >= MSGS.length - 1) clearInterval(iv);
-    }, 600);
     try {
       const item = await createWishlistItem(form);
-      setTimeout(() => {
-        clearInterval(iv);
-        setResult(item);
-        setStage("match");
-        onCreated?.();
-      }, 3200);
+      // simulate a short delay for the searching animation
+      await new Promise((r) => setTimeout(r, 1800));
+      setResult(item);
+      setStage("match");
+      onCreated?.();
     } catch {
-      clearInterval(iv);
       setError("Something went wrong. Please try again.");
       setStage("form");
     }
   };
 
-  const field = (key: keyof typeof form, label: string, ph: string) => (
-    <div key={key}>
-      <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-[#71717A]">
-        {label}
-      </label>
-      <input
-        value={form[key]}
-        onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-        placeholder={ph}
-        className="w-full rounded-md border border-[#E4E4E7] bg-white px-4 py-2.5 text-[#18181B] placeholder:text-[#71717A] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
-      />
-    </div>
-  );
+  const updateField = (key: keyof typeof form, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#18181B]/50 p-4 backdrop-blur-sm sm:items-center">
-      <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#18181B]/40 p-4 backdrop-blur-sm sm:items-center">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#E4E4E7] px-6 pt-5 pb-4">
+        <div className="flex items-start justify-between border-b border-[#E4E4E7] p-5">
           <div>
-            <h2 className="text-[18px] font-bold leading-[28px] text-[#18181B] sm:text-[24px] sm:leading-[32px]">
-              🔖 Request a Resource
-            </h2>
+            <div className="flex items-center gap-2">
+              <Bookmark size={20} className="text-[#18181B]" />
+              <h2 className="text-lg font-bold text-[#18181B] sm:text-xl">
+                Request a Resource
+              </h2>
+            </div>
             <p className="mt-0.5 text-xs text-[#71717A]">
-              We&apos;ll match you with nearby students
+              We'll match you with nearby students who have what you need.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="flex-shrink-0 rounded-md p-1.5 text-[#71717A] transition hover:text-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
-            aria-label="Close modal"
+            className="rounded-lg p-1.5 text-[#A1A1AA] transition hover:bg-[#F4F4F5] hover:text-[#18181B]"
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        {/* Content */}
+        <div className="space-y-5 p-5">
           {stage === "form" && (
-            <>
-              {field("title", "Resource Name", "e.g. Physical Chemistry by O.P. Tandon")}
-              {field("subject", "Subject", "e.g. Chemistry")}
-              {field("curriculum", "Curriculum / Exam", "e.g. NEET / CBSE Class 12")}
-              {field("grade", "Grade / Year", "e.g. Class 12")}
-              {error && <p className="text-sm text-rose-600">{error}</p>}
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <InputField
+                  label="Resource Name"
+                  value={form.title}
+                  onChange={(v) => updateField("title", v)}
+                  placeholder="e.g. Physical Chemistry by O.P. Tandon"
+                />
+                <InputField
+                  label="Subject"
+                  value={form.subject}
+                  onChange={(v) => updateField("subject", v)}
+                  placeholder="e.g. Chemistry"
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <InputField
+                    label="Curriculum / Exam"
+                    value={form.curriculum}
+                    onChange={(v) => updateField("curriculum", v)}
+                    placeholder="CBSE, NEET…"
+                  />
+                  <InputField
+                    label="Grade / Year"
+                    value={form.grade}
+                    onChange={(v) => updateField("grade", v)}
+                    placeholder="Class 12"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600">
+                  <AlertCircle size={16} />
+                  {error}
+                </div>
+              )}
+
               <button
                 onClick={submit}
-                className="w-full rounded-md bg-[#18181B] py-3 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#18181B] py-2.5 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
               >
-                Search Network →
+                <Search size={16} />
+                Search Network
               </button>
-            </>
+            </div>
           )}
 
           {stage === "searching" && (
-            <div className="py-6 flex flex-col items-center gap-6">
-              <div className="relative h-20 w-20">
-                <div className="absolute inset-0 rounded-full border-4 border-[#E4E4E7]" />
-                <div className="absolute inset-0 animate-spin rounded-full border-4 border-t-[#18181B] border-r-[#18181B]/50 border-b-transparent border-l-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center text-2xl">🔍</div>
+            <div className="flex flex-col items-center gap-6 py-8">
+              <div className="relative">
+                <Loader2 size={48} className="animate-spin text-[#18181B]" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Search size={20} className="text-[#18181B]" />
+                </div>
               </div>
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-1">
                 <p className="text-sm font-semibold text-[#18181B]">
-                  Matching you with students…
+                  Searching for matches…
                 </p>
-                <p className="text-sm text-[#52525B]">{MSGS[msgIdx]}</p>
-              </div>
-              <div className="flex gap-1.5">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-2 w-2 animate-bounce rounded-full bg-[#18181B]"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
+                <p className="text-xs text-[#71717A]">
+                  Looking through listings near you
+                </p>
               </div>
             </div>
           )}
 
           {stage === "match" && result && (
             <div className="space-y-4">
-              {result.status === "match" ? (
+              {/* Match found */}
+              {result.status === "match" && (
                 <>
-                  <div className="rounded-md border border-emerald-200 bg-emerald-50 p-5 text-center space-y-2">
-                    <div className="text-4xl">🎉</div>
-                    <h3 className="text-[20px] font-bold leading-[28px] text-emerald-700">
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 text-center">
+                    <CheckCircle2 size={32} className="mx-auto mb-3 text-emerald-600" />
+                    <h3 className="text-lg font-bold text-emerald-700">
                       Match Found!
                     </h3>
-                    <p className="text-sm text-emerald-700/80">
-                      A student nearby has exactly what you need.
+                    <p className="mt-1 text-sm text-emerald-700/80">
+                      A student nearby has the exact resource you need.
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 rounded-md border border-[#E4E4E7] bg-white p-4">
+                  <div className="flex items-center gap-4 rounded-xl border border-[#E4E4E7] bg-white p-4">
                     <Avatar
-                      initials={result.matchName?.slice(0, 2).toUpperCase() ?? "S"}
+                      initials={
+                        result.matchName?.slice(0, 2).toUpperCase() ?? "ST"
+                      }
                       size="md"
-                      gradient="emerald"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-[#18181B]">{result.matchName}</p>
-                      <p className="line-clamp-1 text-sm text-[#52525B]">
-                        {result.title} · Good condition
+                      <p className="font-semibold text-[#18181B]">
+                        {result.matchName}
                       </p>
-                      <p className="mt-0.5 text-xs text-emerald-700">
-                        📍 {result.matchDistance} away
-                      </p>
+                      <p className="text-sm text-[#52525B]">{result.title}</p>
+                      <div className="mt-1 flex items-center gap-1 text-xs text-emerald-700">
+                        <MapPin size={12} />
+                        {result.matchDistance} away
+                      </div>
                     </div>
                   </div>
-                  <button className="w-full rounded-md bg-emerald-700 py-3 text-sm font-medium text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2">
-                    Contact Seller →
+                  <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700">
+                    Contact Seller
+                    <ArrowRight size={16} />
                   </button>
                 </>
-              ) : result.status === "potential" ? (
+              )}
+
+              {/* Potential matches */}
+              {result.status === "potential" && (
                 <div className="space-y-4">
-                  <div className="rounded-md border border-amber-200 bg-amber-50 p-5 text-center space-y-2">
-                    <div className="text-4xl">👀</div>
-                    <h3 className="text-[20px] font-bold leading-[28px] text-amber-700">
-                      {result.matchCount} Potential Matches
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5 text-center">
+                    <Sparkles size={32} className="mx-auto mb-3 text-amber-600" />
+                    <h3 className="text-lg font-bold text-amber-700">
+                      {result.matchCount} Potential Match{result.matchCount !== 1 && "es"}
                     </h3>
-                    <p className="text-sm text-amber-700/80">
-                      Found listings that might work. Added to your wishlist.
+                    <p className="mt-1 text-sm text-amber-700/80">
+                      We found listings that might work — added to your wishlist.
                     </p>
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-full rounded-md border border-[#E4E4E7] bg-white py-3 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white py-2.5 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
                   >
-                    View in Wishlist →
+                    View in Wishlist
+                    <ArrowRight size={16} />
                   </button>
                 </div>
-              ) : (
+              )}
+
+              {/* No match – searching */}
+              {result.status === "searching" && (
                 <div className="space-y-4">
-                  <div className="rounded-md border border-blue-200 bg-blue-50 p-5 text-center space-y-2">
-                    <div className="text-4xl">🔍</div>
-                    <h3 className="text-[20px] font-bold leading-[28px] text-blue-700">
+                  <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-5 text-center">
+                    <Search size={32} className="mx-auto mb-3 text-blue-600" />
+                    <h3 className="text-lg font-bold text-blue-700">
                       Added to Wishlist
                     </h3>
-                    <p className="text-sm text-blue-700/80">
-                      No matches yet — we&apos;ll notify you the moment one appears.
+                    <p className="mt-1 text-sm text-blue-700/80">
+                      No matches yet — we'll notify you when one appears.
                     </p>
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-full rounded-md border border-[#E4E4E7] bg-white py-3 text-sm font-medium text-[#18181B] transition hover:border-[#18181B] hover:bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white py-2.5 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
                   >
                     Got It
                   </button>
@@ -203,6 +232,33 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Tiny reusable input
+function InputField({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
+        {label}
+      </label>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="mt-1 w-full rounded-lg border border-[#E4E4E7] bg-white px-3 py-2 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
+      />
     </div>
   );
 }

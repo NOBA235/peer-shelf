@@ -363,5 +363,5 @@ select.input-base { cursor: pointer; }
 a, button { transition: color 0.15s, background 0.15s, border-color 0.15s, opacity 0.15s; }
 
 /* ── Focus visible ─────────────────────────────────────────── */
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+:focus-visible { outline: 2px solid var (--accent); outline-offset: 2px; border-radius: 4px; }
 input:focus, select:focus, textarea:focus { outline: none; }
