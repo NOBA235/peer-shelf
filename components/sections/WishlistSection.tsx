@@ -2,16 +2,27 @@
 import { useState, useEffect } from "react";
 import { fetchWishlist, deleteWishlistItem, WishlistDoc } from "@/lib/api";
 import { Badge, Skeleton, EmptyState, SectionLabel } from "../ui";
-import { CheckCircle2, Circle, Clock, Plus, Trash2, ChevronRight, Sparkles, Eye } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Plus,
+  Trash2,
+  ChevronRight,
+  Sparkles,
+  Eye,
+} from "lucide-react";
 
 interface Props {
   onRequest: () => void;
 }
 
-const STATUS_CFG: Record<string, { label: string; color: "emerald" | "amber" | "blue" }> = {
-  match:     { label: "Match Found",     color: "emerald" },
+const STATUS_CFG: Record<
+  string,
+  { label: string; color: "emerald" | "amber" | "blue" }
+> = {
+  match: { label: "Match Found", color: "emerald" },
   potential: { label: "Potential Match", color: "amber" },
-  searching: { label: "Searching",       color: "blue" },
+  searching: { label: "Searching", color: "blue" },
 };
 
 export default function WishlistSection({ onRequest }: Props) {
@@ -39,77 +50,207 @@ export default function WishlistSection({ onRequest }: Props) {
   const searchingCount = items.filter((i) => i.status === "searching").length;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 py-12 text-[#18181B] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl space-y-6 sm:space-y-8">
+    <div style={{ minHeight: "100vh", backgroundColor: "#FAFAFA", color: "#18181B" }}>
+      <div
+        style={{
+          margin: "0 auto",
+          width: "100%",
+          maxWidth: "48rem", // max-w-3xl
+          padding: "2rem 1rem", // py-8 px-4
+          display: "flex",
+          flexDirection: "column",
+          gap: "1.5rem", // space-y-6
+        }}
+      >
         {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+          className="sm:flex-row sm:items-start"
+        >
           <div>
             <SectionLabel>Resource Matching</SectionLabel>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Your Wishlist</h1>
-            <p className="mt-1 text-sm text-[#52525B]">
+            <h1
+              style={{
+                marginTop: "0.25rem",
+                fontSize: "1.5rem",
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+              className="sm:text-3xl"
+            >
+              Your Wishlist
+            </h1>
+            <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: "#52525B" }}>
               Resources you&apos;re looking for — we&apos;ll notify when matched.
             </p>
           </div>
           <button
             onClick={onRequest}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#18181B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              borderRadius: "0.5rem",
+              backgroundColor: "#18181B",
+              padding: "0.625rem 1rem",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#27272A")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "#18181B")
+            }
           >
             <Plus size={16} />
             Request a Resource
           </button>
         </div>
 
-        {/* Quick stats – now stack on mobile */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
+        {/* Quick stats */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "0.5rem",
+          }}
+          className="sm:gap-4"
+        >
           {[
-            { count: matchedCount, label: "Matched", icon: CheckCircle2, color: "text-emerald-600" },
-            { count: potentialCount, label: "Potential", icon: Eye, color: "text-amber-600" },
-            { count: searchingCount, label: "Searching", icon: Clock, color: "text-blue-600" },
+            { count: matchedCount, label: "Matched", icon: CheckCircle2, color: "#059669" },
+            { count: potentialCount, label: "Potential", icon: Eye, color: "#D97706" },
+            { count: searchingCount, label: "Searching", icon: Clock, color: "#2563EB" },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="flex flex-row items-center gap-3 rounded-xl border border-[#E4E4E7] bg-white p-4 sm:flex-col sm:items-center sm:justify-center sm:gap-2 sm:p-5"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.25rem",
+                borderRadius: "0.75rem",
+                border: "1px solid #E4E4E7",
+                backgroundColor: "white",
+                padding: "0.75rem",
+              }}
+              className="sm:p-4"
             >
-              <stat.icon className={`h-6 w-6 ${stat.color}`} />
-              <div className="flex items-baseline gap-1 sm:flex-col sm:items-center sm:gap-0">
-                <p className="text-2xl font-bold leading-tight">{stat.count}</p>
-                <p className="text-xs text-[#71717A] sm:mt-0.5">{stat.label}</p>
-              </div>
+              <stat.icon size={20} color={stat.color} className="sm:h-6 sm:w-6" />
+              <p style={{ fontSize: "1.125rem", fontWeight: 700, lineHeight: 1 }}>
+                {stat.count}
+              </p>
+              <p style={{ fontSize: "0.625rem", color: "#71717A" }} className="sm:text-xs">
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Match alert banner – flexible on mobile */}
+        {/* Match alert banner */}
         {items.some((i) => i.status === "match") && (
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/50 px-5 py-4 transition hover:border-emerald-300 sm:flex-nowrap sm:gap-4">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
-              <Sparkles size={20} className="text-emerald-700" />
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: "0.75rem",
+              borderRadius: "0.75rem",
+              border: "1px solid #A7F3D0",
+              backgroundColor: "rgba(236, 253, 245, 0.5)",
+              padding: "0.75rem 1rem",
+              transition: "border-color 0.2s",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.borderColor = "#6EE7B7")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.borderColor = "#A7F3D0")
+            }
+          >
+            <div
+              style={{
+                display: "flex",
+                width: "2rem",
+                height: "2rem",
+                flexShrink: 0,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "50%",
+                backgroundColor: "#D1FAE5",
+              }}
+              className="sm:w-10 sm:h-10"
+            >
+              <Sparkles size={16} color="#047857" className="sm:size-5" />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-emerald-800 truncate">Match found!</p>
-              <p className="mt-0.5 text-xs text-emerald-700 truncate">
-                {items.find((i) => i.status === "match")?.matchName} has a resource you need.
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  color: "#065F46",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                Match found!
+              </p>
+              <p
+                style={{
+                  marginTop: "0.125rem",
+                  fontSize: "0.75rem",
+                  color: "#047857",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {items.find((i) => i.status === "match")?.matchName} has a
+                resource you need.
               </p>
             </div>
-            <ChevronRight size={18} className="flex-shrink-0 text-emerald-600" />
+            <ChevronRight size={16} color="#059669" style={{ flexShrink: 0 }} />
           </div>
         )}
 
         {/* Content */}
         {loading ? (
-          <div className="space-y-4">
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-28 rounded-xl" />
+              <Skeleton key={i} style={{ height: "6rem", borderRadius: "0.75rem" }} />
             ))}
           </div>
         ) : items.length === 0 ? (
           <EmptyState
-            icon={<Sparkles size={32} className="text-[#A1A1AA]" />}
+            icon={<Sparkles size={28} color="#A1A1AA" />}
             title="Your wishlist is empty"
             desc="Request a textbook or notes and we'll instantly search for nearby matches."
           />
         ) : (
-          <ul className="space-y-4">
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.75rem",
+            }}
+            className="sm:gap-4"
+          >
             {items.map((item) => {
               const cfg = STATUS_CFG[item.status];
               const isMatch = item.status === "match";
@@ -119,25 +260,92 @@ export default function WishlistSection({ onRequest }: Props) {
               return (
                 <li
                   key={item._id}
-                  className="rounded-xl border border-[#E4E4E7] bg-white p-4 transition hover:border-[#18181B] sm:p-5"
+                  style={{
+                    borderRadius: "0.75rem",
+                    border: "1px solid #E4E4E7",
+                    backgroundColor: "white",
+                    padding: "0.75rem",
+                    transition: "border-color 0.2s, box-shadow 0.2s",
+                  }}
+                  className="sm:p-4 hover:border-[#18181B]/50 hover:shadow-sm"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(24,24,27,0.5)";
+                    e.currentTarget.style.boxShadow =
+                      "0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#E4E4E7";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm font-semibold truncate">{item.title}</h3>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      justifyContent: "space-between",
+                      gap: "0.75rem",
+                    }}
+                  >
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <h3
+                        style={{
+                          fontSize: "0.875rem",
+                          fontWeight: 500,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.title}
+                      </h3>
+                      <div
+                        style={{
+                          marginTop: "0.5rem",
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "0.375rem",
+                        }}
+                      >
                         <Badge color="violet">{item.subject}</Badge>
                         <Badge color="blue">{item.curriculum}</Badge>
                         <Badge color="slate">{item.grade}</Badge>
                       </div>
-                      <p className="mt-1.5 text-xs text-[#71717A]">
+                      <p
+                        style={{
+                          marginTop: "0.375rem",
+                          fontSize: "0.75rem",
+                          color: "#71717A",
+                        }}
+                      >
                         Added {item.addedDaysAgo}d ago
                       </p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-end",
+                        gap: "0.5rem",
+                      }}
+                    >
                       <Badge color={cfg.color}>{cfg.label}</Badge>
                       <button
                         onClick={() => remove(item._id)}
-                        className="text-xs text-[#A1A1AA] hover:text-rose-600 transition rounded focus:outline-none"
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "#A1A1AA",
+                          fontSize: "0.75rem",
+                          padding: 0,
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.color = "#E11D48")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.color = "#A1A1AA")
+                        }
+                        aria-label="Remove item"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -146,44 +354,116 @@ export default function WishlistSection({ onRequest }: Props) {
 
                   {/* Match highlight */}
                   {isMatch && item.matchName && (
-                    <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-3 sm:flex-nowrap">
-                      <CheckCircle2 size={18} className="text-emerald-600 flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-emerald-800 truncate">
+                    <div
+                      style={{
+                        marginTop: "0.75rem",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        borderRadius: "0.5rem",
+                        border: "1px solid #A7F3D0",
+                        backgroundColor: "rgba(236, 253, 245, 0.6)",
+                        padding: "0.5rem 0.75rem",
+                      }}
+                      className="sm:px-4 sm:py-3"
+                    >
+                      <CheckCircle2 size={16} color="#059669" style={{ flexShrink: 0 }} />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <p
+                          style={{
+                            fontSize: "0.875rem",
+                            fontWeight: 500,
+                            color: "#065F46",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
                           {item.matchName} has this resource
                         </p>
                         {item.matchDistance && (
-                          <p className="text-xs text-emerald-700 truncate">{item.matchDistance} away</p>
+                          <p
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "#047857",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {item.matchDistance} away
+                          </p>
                         )}
                       </div>
-                      <ChevronRight size={16} className="flex-shrink-0 text-emerald-600" />
+                      <ChevronRight size={14} color="#059669" style={{ flexShrink: 0 }} />
                     </div>
                   )}
 
                   {/* Potential matches */}
                   {isPotential && item.matchCount && (
-                    <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 px-4 py-3 sm:flex-nowrap">
-                      <Eye size={18} className="text-amber-600 flex-shrink-0" />
-                      <p className="min-w-0 flex-1 text-sm font-medium text-amber-800 truncate">
-                        {item.matchCount} potential listing{item.matchCount > 1 ? "s" : ""} nearby
+                    <div
+                      style={{
+                        marginTop: "0.75rem",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        borderRadius: "0.5rem",
+                        border: "1px solid #FCD34D",
+                        backgroundColor: "rgba(255, 251, 235, 0.6)",
+                        padding: "0.5rem 0.75rem",
+                      }}
+                      className="sm:px-4 sm:py-3"
+                    >
+                      <Eye size={16} color="#D97706" style={{ flexShrink: 0 }} />
+                      <p
+                        style={{
+                          minWidth: 0,
+                          flex: 1,
+                          fontSize: "0.875rem",
+                          fontWeight: 500,
+                          color: "#92400E",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.matchCount} potential listing
+                        {item.matchCount > 1 ? "s" : ""} nearby
                       </p>
-                      <ChevronRight size={16} className="flex-shrink-0 text-amber-600" />
+                      <ChevronRight size={14} color="#D97706" style={{ flexShrink: 0 }} />
                     </div>
                   )}
 
                   {/* Searching indicator */}
                   {isSearching && (
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="flex gap-1">
+                    <div
+                      style={{
+                        marginTop: "0.75rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <div style={{ display: "flex", gap: "0.25rem" }}>
                         {[0, 1, 2].map((i) => (
                           <div
                             key={i}
-                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#A1A1AA]"
-                            style={{ animationDelay: `${i * 0.15}s` }}
+                            style={{
+                              width: "0.375rem",
+                              height: "0.375rem",
+                              borderRadius: "50%",
+                              backgroundColor: "#A1A1AA",
+                              animation: "bounce 1s infinite",
+                              animationDelay: `${i * 0.15}s`,
+                            }}
                           />
                         ))}
                       </div>
-                      <p className="text-xs text-[#71717A]">Scanning network for matches…</p>
+                      <p style={{ fontSize: "0.75rem", color: "#71717A" }}>
+                        Scanning network for matches…
+                      </p>
                     </div>
                   )}
                 </li>

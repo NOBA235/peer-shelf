@@ -65,21 +65,20 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
   }, [search]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 py-10 text-[#18181B] sm:px-6 lg:px-8">
-      {/* Narrower SaaS-style container */}
-      <div className="mx-auto max-w-5xl space-y-10">
+    <div className="min-h-screen bg-[#FAFAFA] flex justify-center">
+      <div className="w-full max-w-5xl px-4 sm:px-6 lg:px-10 py-8 md:py-10 flex flex-col gap-6">
         {/* ── Header ── */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <SectionLabel>Browse</SectionLabel>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Marketplace</h1>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Marketplace</h1>
             <p className="mt-1 text-sm text-zinc-500">
-              {listings.length} resources available near you
+              {listings.length} resource{listings.length !== 1 ? "s" : ""} available near you
             </p>
           </div>
           <button
             onClick={onRequest}
-            className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 whitespace-nowrap"
           >
             <BookmarkPlus size={16} />
             Request a Resource
@@ -87,28 +86,28 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
         </div>
 
         {/* ── Search & filter toggle ── */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search books, notes, formula sheets…"
-              className="w-full rounded-lg border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
+              className="w-full rounded-lg border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`inline-flex h-10 flex-shrink-0 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition focus:outline-none ${
+            className={`inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition focus:outline-none ${
               showFilters
                 ? "border-zinc-300 bg-zinc-50 text-zinc-900"
                 : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
             }`}
           >
-            <SlidersHorizontal size={16} />
+            <SlidersHorizontal size={15} />
             Filters
             {activeFilters > 0 && (
-              <span className="text-xs text-zinc-400">({activeFilters})</span>
+              <span className="text-xs text-zinc-400 ml-0.5">({activeFilters})</span>
             )}
           </button>
         </div>
@@ -129,38 +128,65 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
 
         {/* ── Advanced filters ── */}
         {showFilters && (
-          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                ["Type", type, setType, TYPES],
-                ["Board", board, setBoard, BOARDS],
-                ["City", city, setCity, CITIES],
-              ].map(([label, val, setter, opts]) => (
-                <div key={label as string}>
-                  <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide">
-                    {label as string}
-                  </label>
-                  <select
-                    value={val as string}
-                    onChange={(e) => (setter as (v: string) => void)(e.target.value)}
-                    className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
-                  >
-                    {(opts as string[]).map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ))}
+          <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm flex flex-col gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Type */}
               <div>
-                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide">
+                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1.5">
+                  Type
+                </label>
+                <select
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
+                >
+                  {TYPES.map((o) => (
+                    <option key={o} value={o}>{o}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Board */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1.5">
+                  Board
+                </label>
+                <select
+                  value={board}
+                  onChange={(e) => setBoard(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
+                >
+                  {BOARDS.map((o) => (
+                    <option key={o} value={o}>{o}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* City */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1.5">
+                  City
+                </label>
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
+                >
+                  {CITIES.map((o) => (
+                    <option key={o} value={o}>{o}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sort */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1.5">
                   Sort By
                 </label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
                 >
                   {[
                     ["createdAt", "Most Recent"],
@@ -168,13 +194,12 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
                     ["price-desc", "Price ↓"],
                     ["saves", "Most Saved"],
                   ].map(([v, l]) => (
-                    <option key={v} value={v}>
-                      {l}
-                    </option>
+                    <option key={v} value={v}>{l}</option>
                   ))}
                 </select>
               </div>
             </div>
+
             {activeFilters > 0 && (
               <button
                 onClick={() => {
@@ -183,7 +208,7 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
                   setBoard("All Boards");
                   setCity("All Cities");
                 }}
-                className="text-sm font-medium text-zinc-600 underline underline-offset-2 hover:text-zinc-900"
+                className="text-sm font-medium text-zinc-600 underline underline-offset-2 hover:text-zinc-900 self-start"
               >
                 Clear all filters
               </button>
@@ -193,19 +218,19 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
 
         {/* ── Results ── */}
         {loading ? (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-36 rounded-xl" />
+              <Skeleton key={i} className="h-32 rounded-xl" />
             ))}
           </div>
         ) : listings.length === 0 ? (
           <EmptyState
-            icon={<PackageOpen size={32} className="text-zinc-300" />}
+            icon={<PackageOpen size={28} className="text-zinc-300" />}
             title="No resources found"
             desc="Try adjusting filters or request this resource"
           />
         ) : (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
             {listings.map((l) => (
               <ListingCard key={l._id} listing={toListin(l)} onClick={onListingClick} />
             ))}

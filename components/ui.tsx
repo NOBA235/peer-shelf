@@ -138,8 +138,17 @@ export const EmptyState = ({
 );
 
 // ── Skeleton ───────────────────────────────────────────────────
-export const Skeleton = ({ className = "" }: { className?: string }) => (
-  <div className={`animate-pulse rounded-md bg-[#F4F4F5] ${className}`} />
+export const Skeleton = ({
+  className = "",
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) => (
+  <div
+    className={`animate-pulse rounded-md bg-[#F4F4F5] ${className}`}
+    style={style}
+  />
 );
 
 // ── Stat card ──────────────────────────────────────────────────

@@ -8,70 +8,184 @@ interface Props {
 
 export default function ScanSection({ onOpenScanner }: Props) {
   return (
-    <div className="flex flex-col items-center px-4 py-16 text-center sm:py-24">
-      {/* Badge / label */}
-      <SectionLabel>Book Scanner</SectionLabel>
+    <>
+      {/* Scoped responsive styles */}
+      <style>{`
+        .scan-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 4rem 1rem;
+          margin: 0 auto;
+          max-width: 64rem;
+        }
+        .scan-headline {
+          margin-top: 0.75rem;
+          max-width: 28rem;
+          font-size: 1.5rem;
+          font-weight: 700;
+          line-height: 1.2;
+          color: #18181B;
+        }
+        .scan-desc {
+          margin-top: 0.75rem;
+          max-width: 24rem;
+          font-size: 0.875rem;
+          color: #52525B;
+        }
+        .scan-trigger {
+          margin-top: 2.5rem;
+          width: 100%;
+          max-width: 20rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+          border-radius: 1rem;
+          border: 2px dashed #D4D4D8;
+          background-color: white;
+          padding: 2.5rem 1.5rem;
+          transition: border-color 0.2s, background-color 0.2s;
+          cursor: pointer;
+        }
+        .scan-trigger:hover {
+          border-color: #18181B;
+          background-color: #FAFAFA;
+        }
+        .scan-trigger .camera-circle {
+          display: flex;
+          width: 3.5rem;
+          height: 3.5rem;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background-color: #F4F4F5;
+          transition: background-color 0.2s;
+        }
+        .scan-trigger:hover .camera-circle {
+          background-color: #18181B;
+        }
+        .scan-trigger .camera-circle svg {
+          color: #52525B;
+          transition: color 0.2s;
+        }
+        .scan-trigger:hover .camera-circle svg {
+          color: white;
+        }
+        .steps-grid {
+          margin-top: 3.5rem;
+          width: 100%;
+          max-width: 32rem;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+          text-align: left;
+        }
+        .cta-button {
+          margin-top: 2.5rem;
+          width: 100%;
+          max-width: 20rem;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          border-radius: 0.75rem;
+          background-color: #18181B;
+          padding: 0.75rem 1.5rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: white;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .cta-button:hover {
+          background-color: #27272A;
+        }
+        .cta-button:focus {
+          outline: 2px solid #18181B;
+          outline-offset: 2px;
+        }
+        @media (min-width: 640px) {
+          .scan-container {
+            padding: 6rem 1.5rem;
+          }
+          .scan-headline {
+            font-size: 1.875rem;
+          }
+          .steps-grid {
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+          }
+        }
+      `}</style>
 
-      {/* Headline */}
-      <h1 className="mt-3 max-w-md text-2xl font-bold tracking-tight text-[#18181B] sm:text-3xl">
-        Scan any textbook, list it instantly
-      </h1>
-      <p className="mt-3 max-w-sm text-sm text-[#52525B]">
-        Point your camera at a book cover. We extract the title, author, and
-        let you set a price in under 30 seconds.
-      </p>
+      <div style={{ minHeight: "100vh", backgroundColor: "#FAFAFA", color: "#18181B" }}>
+        <div className="scan-container">
+          {/* Badge / label */}
+          <SectionLabel>Book Scanner</SectionLabel>
 
-      {/* Scan trigger */}
-      <button
-        onClick={onOpenScanner}
-        className="group mt-10 flex w-full max-w-xs flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-[#D4D4D8] bg-white px-6 py-10 transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
-      >
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F4F4F5] transition group-hover:bg-[#18181B]">
-          <Camera className="h-6 w-6 text-[#52525B] transition group-hover:text-white" />
-        </div>
-        <span className="text-sm font-semibold text-[#18181B]">
-          Tap to open camera or upload
-        </span>
-        <span className="text-xs text-[#71717A]">
-          Works with ISBN barcodes & cover photos
-        </span>
-      </button>
+          {/* Headline */}
+          <h1 className="scan-headline">
+            Scan any textbook, list it instantly
+          </h1>
+          <p className="scan-desc">
+            Point your camera at a book cover. We extract the title, author, and
+            let you set a price in under 30 seconds.
+          </p>
 
-      {/* How it works – 3 clean steps */}
-      <div className="mt-14 grid w-full max-w-lg grid-cols-1 gap-6 text-left sm:grid-cols-3 sm:text-center">
-        {[
-          {
-            icon: Camera,
-            title: "Snap a photo",
-            desc: "Take a picture of any textbook cover or barcode.",
-          },
-          {
-            icon: Zap,
-            title: "Instant metadata",
-            desc: "We read the ISBN, fetch real title & author details.",
-          },
-          {
-            icon: Upload,
-            title: "List in seconds",
-            desc: "Set price, condition, and publish. Done.",
-          },
-        ].map((step) => (
-          <div key={step.title}>
-            <step.icon className="h-6 w-6 text-[#18181B]" />
-            <h3 className="mt-2 text-sm font-semibold text-[#18181B]">{step.title}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-[#71717A]">{step.desc}</p>
+          {/* Scan trigger */}
+          <button onClick={onOpenScanner} className="scan-trigger">
+            <div className="camera-circle">
+              <Camera size={24} />
+            </div>
+            <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#18181B" }}>
+              Tap to open camera or upload
+            </span>
+            <span style={{ fontSize: "0.75rem", color: "#71717A" }}>
+              Works with ISBN barcodes & cover photos
+            </span>
+          </button>
+
+          {/* How it works – 3 steps */}
+          <div className="steps-grid">
+            {[
+              {
+                icon: Camera,
+                title: "Snap a photo",
+                desc: "Take a picture of any textbook cover or barcode.",
+              },
+              {
+                icon: Zap,
+                title: "Instant metadata",
+                desc: "We read the ISBN, fetch real title & author details.",
+              },
+              {
+                icon: Upload,
+                title: "List in seconds",
+                desc: "Set price, condition, and publish. Done.",
+              },
+            ].map((step) => (
+              <div key={step.title}>
+                <step.icon size={24} color="#18181B" />
+                <h3 style={{ marginTop: "0.5rem", fontSize: "0.875rem", fontWeight: 600, color: "#18181B" }}>
+                  {step.title}
+                </h3>
+                <p style={{ marginTop: "0.25rem", fontSize: "0.75rem", lineHeight: 1.5, color: "#71717A" }}>
+                  {step.desc}
+                </p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Primary CTA */}
-      <button
-        onClick={onOpenScanner}
-        className="mt-10 inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-xl bg-[#18181B] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
-      >
-        <Camera size={18} />
-        Open Scanner
-      </button>
-    </div>
+          {/* Primary CTA */}
+          <button onClick={onOpenScanner} className="cta-button">
+            <Camera size={18} />
+            Open Scanner
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

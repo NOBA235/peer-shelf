@@ -102,282 +102,656 @@ export default function ResourceModal({ listing: l, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#18181B]/40 p-4 backdrop-blur-sm sm:items-center">
-      <div className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        {/* ── Header ──────────────────────────────────── */}
-        <div className="flex flex-shrink-0 gap-4 p-6 pb-5">
-          <div className="flex h-20 w-16 flex-shrink-0 items-center justify-center rounded-xl border border-[#E4E4E7] bg-[#FAFAFA] text-3xl">
-            {l.image}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-bold leading-snug text-[#18181B] sm:text-xl">
-              {l.title}
-            </h2>
-            <p className="mt-0.5 text-sm text-[#52525B]">by {l.author}</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              <Badge color="violet">{l.subject}</Badge>
-              <Badge color="blue">{l.curriculum}</Badge>
-              <Badge color="slate">{l.grade}</Badge>
+    <>
+      <style>{`
+        /* Overlay */
+        .resource-modal-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 50;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          background: rgba(24,24,27,0.4);
+          backdrop-filter: blur(4px);
+          padding: 1rem;
+        }
+        /* Card */
+        .resource-modal-card {
+          width: 100%;
+          max-width: 32rem;
+          max-height: 92vh;
+          display: flex;
+          flex-direction: column;
+          border-radius: 1.25rem;
+          background: white;
+          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+          overflow: hidden;
+        }
+        /* Header */
+        .resource-modal-header {
+          display: flex;
+          gap: 1rem;
+          padding: 1.5rem 1.5rem 1.25rem;
+          flex-shrink: 0;
+        }
+        .resource-modal-header .book-icon {
+          width: 4rem;
+          height: 5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: #FAFAFA;
+          font-size: 1.875rem;
+          flex-shrink: 0;
+        }
+        .header-info {
+          min-width: 0;
+          flex: 1;
+        }
+        .header-title {
+          font-size: 1.125rem;
+          font-weight: 700;
+          line-height: 1.3;
+          color: #18181B;
+        }
+        .header-author {
+          margin-top: 0.125rem;
+          font-size: 0.875rem;
+          color: #52525B;
+        }
+        .header-badges {
+          margin-top: 0.5rem;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.375rem;
+        }
+        .close-btn {
+          flex-shrink: 0;
+          border-radius: 0.5rem;
+          padding: 0.375rem;
+          background: transparent;
+          border: none;
+          color: #A1A1AA;
+          cursor: pointer;
+          transition: background 0.2s, color 0.2s;
+        }
+        .close-btn:hover {
+          background: #F4F4F5;
+          color: #18181B;
+        }
+        /* Tabs */
+        .tabs-bar {
+          display: flex;
+          flex-shrink: 0;
+          border-bottom: 1px solid #E4E4E7;
+          padding: 0 1.5rem;
+        }
+        .tab-button {
+          position: relative;
+          padding: 0.75rem 1rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          text-transform: capitalize;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: #A1A1AA;
+          transition: color 0.2s;
+        }
+        .tab-button:hover {
+          color: #52525B;
+        }
+        .tab-button.active {
+          color: #18181B;
+        }
+        .tab-underline {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          border-radius: 9999px;
+          background: #18181B;
+        }
+        /* Body */
+        .resource-modal-body {
+          flex: 1;
+          overflow-y: auto;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+        .section-label {
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #A1A1AA;
+          margin-bottom: 0.5rem;
+        }
+        /* Stats grid */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+        }
+        .stat-card {
+          border-radius: 0.5rem;
+          border: 1px solid #F4F4F5;
+          background: #FAFAFA;
+          padding: 0.75rem;
+        }
+        .stat-label-text {
+          font-size: 0.625rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #A1A1AA;
+        }
+        .stat-value-text {
+          margin-top: 0.25rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #18181B;
+        }
+        .description-text {
+          font-size: 0.875rem;
+          line-height: 1.6;
+          color: #52525B;
+        }
+        /* Included items */
+        .included-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .included-item {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.875rem;
+          color: #52525B;
+        }
+        /* Pickup card */
+        .pickup-card {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: #FAFAFA;
+          padding: 1rem;
+        }
+        /* Mentor card */
+        .mentor-card {
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: #FAFAFA;
+          padding: 1rem;
+          border-left: 4px solid #F59E0B;
+        }
+        .mentor-card-header {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #92400E;
+          margin-bottom: 0.5rem;
+        }
+        .mentor-row {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+        .mentor-name {
+          font-weight: 600;
+          color: #18181B;
+        }
+        .mentor-achievement {
+          font-size: 0.75rem;
+          color: #71717A;
+        }
+        .mentor-quote {
+          margin-top: 0.75rem;
+          font-size: 0.875rem;
+          font-style: italic;
+          color: #52525B;
+        }
+        /* Seller tab */
+        .seller-profile {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1.25rem;
+        }
+        .seller-name {
+          font-size: 1.125rem;
+          font-weight: 700;
+          color: #18181B;
+        }
+        .seller-location {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          margin-top: 0.125rem;
+          font-size: 0.75rem;
+          color: #71717A;
+        }
+        .seller-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+        }
+        .seller-stat-card {
+          border-radius: 0.75rem;
+          border: 1px solid #F4F4F5;
+          background: #FAFAFA;
+          padding: 1rem;
+          text-align: center;
+        }
+        .seller-stat-value {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #18181B;
+        }
+        .seller-stat-label {
+          margin-top: 0.25rem;
+          font-size: 0.75rem;
+          color: #71717A;
+        }
+        /* Similar listing item */
+        .similar-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 0.75rem;
+          cursor: pointer;
+          transition: border-color 0.2s, background 0.2s;
+        }
+        .similar-item:hover {
+          border-color: #18181B;
+          background: #FAFAFA;
+        }
+        .similar-image {
+          font-size: 1.5rem;
+        }
+        .similar-info {
+          min-width: 0;
+          flex: 1;
+        }
+        .similar-title {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #18181B;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .similar-meta {
+          font-size: 0.75rem;
+          color: #71717A;
+        }
+        .similar-price {
+          font-size: 0.875rem;
+          font-weight: 700;
+          color: #18181B;
+          flex-shrink: 0;
+        }
+        .similar-chevron {
+          color: #D4D4D8;
+          flex-shrink: 0;
+        }
+        /* Footer */
+        .resource-modal-footer {
+          flex-shrink: 0;
+          border-top: 1px solid #E4E4E7;
+          padding: 1.5rem 1.5rem 1rem;
+        }
+        .action-buttons {
+          display: flex;
+          gap: 0.5rem;
+        }
+        .request-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          border-radius: 0.75rem;
+          background: #18181B;
+          border: none;
+          padding: 0.75rem;
+          width: 100%;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: white;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .request-btn:hover {
+          background: #27272A;
+        }
+        .request-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .save-btn {
+          width: 3rem;
+          height: 3rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          color: #A1A1AA;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s, background 0.2s;
+          flex-shrink: 0;
+        }
+        .save-btn:hover {
+          border-color: #18181B;
+          color: #18181B;
+          background: #FAFAFA;
+        }
+        .save-btn.saved {
+          border-color: #FECACA;
+          background: #FFF1F2;
+          color: #E11D48;
+        }
+        .save-btn:disabled {
+          cursor: not-allowed;
+        }
+        .spinner {
+          width: 1rem;
+          height: 1rem;
+          border-radius: 50%;
+          border: 2px solid rgba(255,255,255,0.3);
+          border-top-color: white;
+          animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @media (min-width: 640px) {
+          .resource-modal-overlay {
+            align-items: center;
+            padding: 1.5rem;
+          }
+          .resource-modal-card {
+            border-radius: 1.5rem;
+          }
+          .stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+          .header-title {
+            font-size: 1.25rem;
+          }
+        }
+      `}</style>
+
+      <div className="resource-modal-overlay">
+        <div className="resource-modal-card">
+          {/* Header */}
+          <div className="resource-modal-header">
+            <div className="book-icon">{l.image}</div>
+            <div className="header-info">
+              <h2 className="header-title">{l.title}</h2>
+              <p className="header-author">by {l.author}</p>
+              <div className="header-badges">
+                <Badge color="violet">{l.subject}</Badge>
+                <Badge color="blue">{l.curriculum}</Badge>
+                <Badge color="slate">{l.grade}</Badge>
+              </div>
             </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex-shrink-0 rounded-lg p-1.5 text-[#A1A1AA] transition hover:bg-[#F4F4F5] hover:text-[#18181B]"
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* ── Tabs ──────────────────────────────────────── */}
-        <div className="flex flex-shrink-0 border-b border-[#E4E4E7] px-6">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`relative px-4 py-3 text-sm font-semibold capitalize transition ${
-                tab === t
-                  ? "text-[#18181B]"
-                  : "text-[#A1A1AA] hover:text-[#52525B]"
-              }`}
-            >
-              {t}
-              {tab === t && (
-                <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-[#18181B]" />
-              )}
+            <button onClick={onClose} className="close-btn" aria-label="Close">
+              <X size={20} />
             </button>
-          ))}
-        </div>
+          </div>
 
-        {/* ── Scrollable content ────────────────────────── */}
-        <div className="flex-1 space-y-6 overflow-y-auto p-6">
-          {tab === "details" && (
-            <>
-              {/* Quick stats */}
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {[
-                  ["Price", l.price === 0 ? "Free" : `₹${l.price}`],
-                  ["Condition", l.condition],
-                  ["City", l.city],
-                  ["Listed", `${l.listedDaysAgo}d ago`],
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="rounded-lg border border-[#F4F4F5] bg-[#FAFAFA] p-3"
-                  >
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[#A1A1AA]">
-                      {label}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-[#18181B]">
-                      {value}
-                    </p>
-                  </div>
-                ))}
-              </div>
+          {/* Tabs */}
+          <div className="tabs-bar">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`tab-button${tab === t ? " active" : ""}`}
+              >
+                {t}
+                {tab === t && <span className="tab-underline" />}
+              </button>
+            ))}
+          </div>
 
-              {/* Description */}
-              <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                  Description
-                </p>
-                <p className="text-sm leading-relaxed text-[#52525B]">
-                  {l.description}
-                </p>
-              </div>
-
-              {/* What's included */}
-              <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                  What&apos;s Included
-                </p>
-                <div className="space-y-2">
-                  {l.included.map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-2 text-sm text-[#52525B]"
-                    >
-                      <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
-                      {item}
+          {/* Scrollable content */}
+          <div className="resource-modal-body">
+            {tab === "details" && (
+              <>
+                {/* Quick stats */}
+                <div className="stats-grid">
+                  {[
+                    ["Price", l.price === 0 ? "Free" : `₹${l.price}`],
+                    ["Condition", l.condition],
+                    ["City", l.city],
+                    ["Listed", `${l.listedDaysAgo}d ago`],
+                  ].map(([label, value]) => (
+                    <div key={label} className="stat-card">
+                      <p className="stat-label-text">{label}</p>
+                      <p className="stat-value-text">{value}</p>
                     </div>
                   ))}
                 </div>
-              </div>
 
-              {/* Pickup point */}
-              <div className="flex items-center gap-3 rounded-xl border border-[#E4E4E7] bg-[#FAFAFA] p-4">
-                <MapPin size={20} className="text-[#71717A]" />
+                {/* Description */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                    Preferred Pickup Point
-                  </p>
-                  <p className="text-sm font-medium text-[#18181B]">
-                    {l.meetupPoint}
-                  </p>
+                  <p className="section-label">Description</p>
+                  <p className="description-text">{l.description}</p>
                 </div>
-              </div>
 
-              {/* Linked mentor */}
-              {l.mentor && linkedMentor && (
-                <div className="rounded-xl border border-l-4 border-l-amber-500 bg-[#FAFAFA] p-4">
-                  <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-amber-700">
-                    <Sparkles size={14} />
-                    Linked Mentor
+                {/* What's included */}
+                <div>
+                  <p className="section-label">What's Included</p>
+                  <div className="included-list">
+                    {l.included.map((item) => (
+                      <div key={item} className="included-item">
+                        <CheckCircle size={16} color="#10B981" style={{ flexShrink: 0 }} />
+                        {item}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Avatar initials={linkedMentor.initials} size="md" />
-                    <div className="flex-1">
-                      <p className="font-semibold text-[#18181B]">{linkedMentor.name}</p>
-                      <p className="text-xs text-[#71717A]">{linkedMentor.achievement}</p>
-                    </div>
-                    <StarRating rating={linkedMentor.rating} />
-                  </div>
-                  {linkedMentor.quote && (
-                    <p className="mt-3 text-sm italic text-[#52525B]">
-                      &ldquo;{linkedMentor.quote}&rdquo;
+                </div>
+
+                {/* Pickup point */}
+                <div className="pickup-card">
+                  <MapPin size={20} color="#71717A" />
+                  <div>
+                    <p className="stat-label-text" style={{ marginBottom: 0 }}>
+                      Preferred Pickup Point
                     </p>
-                  )}
-                </div>
-              )}
-              {l.mentor && !linkedMentor && (
-                <div className="rounded-xl border border-[#E4E4E7] bg-[#FAFAFA] p-4">
-                  <p className="text-sm text-[#A1A1AA]">Fetching linked mentor…</p>
-                </div>
-              )}
-            </>
-          )}
-
-          {tab === "seller" && (
-            <div className="space-y-5">
-              <div className="flex items-center gap-4">
-                <Avatar initials={l.sellerInitials} size="lg" />
-                <div>
-                  <p className="text-lg font-bold text-[#18181B]">
-                    {l.seller.replace(".", "")}
-                  </p>
-                  <StarRating rating={l.rating} />
-                  <div className="mt-0.5 flex items-center gap-1 text-xs text-[#71717A]">
-                    <MapPin size={12} />
-                    {l.location}
+                    <p style={{ fontSize: "0.875rem", fontWeight: 500, color: "#18181B" }}>
+                      {l.meetupPoint}
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-[#F4F4F5] bg-[#FAFAFA] p-4 text-center">
-                  <p className="text-xl font-bold text-[#18181B]">
-                    {sellerCount === null ? "—" : sellerCount}
+                {/* Linked mentor */}
+                {l.mentor && linkedMentor && (
+                  <div className="mentor-card">
+                    <div className="mentor-card-header">
+                      <Sparkles size={14} />
+                      Linked Mentor
+                    </div>
+                    <div className="mentor-row">
+                      <Avatar initials={linkedMentor.initials} size="md" />
+                      <div style={{ flex: 1 }}>
+                        <p className="mentor-name">{linkedMentor.name}</p>
+                        <p className="mentor-achievement">{linkedMentor.achievement}</p>
+                      </div>
+                      <StarRating rating={linkedMentor.rating} />
+                    </div>
+                    {linkedMentor.quote && (
+                      <p className="mentor-quote">“{linkedMentor.quote}”</p>
+                    )}
+                  </div>
+                )}
+                {l.mentor && !linkedMentor && (
+                  <div style={{ borderRadius: "0.75rem", border: "1px solid #E4E4E7", background: "#FAFAFA", padding: "1rem", fontSize: "0.875rem", color: "#A1A1AA" }}>
+                    Fetching linked mentor…
+                  </div>
+                )}
+              </>
+            )}
+
+            {tab === "seller" && (
+              <>
+                <div className="seller-profile">
+                  <Avatar initials={l.sellerInitials} size="lg" />
+                  <div>
+                    <p className="seller-name">{l.seller.replace(".", "")}</p>
+                    <StarRating rating={l.rating} />
+                    <div className="seller-location">
+                      <MapPin size={12} />
+                      {l.location}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="seller-stats-grid">
+                  <div className="seller-stat-card">
+                    <p className="seller-stat-value">
+                      {sellerCount === null ? "—" : sellerCount}
+                    </p>
+                    <p className="seller-stat-label">Active Listings</p>
+                  </div>
+                  <div className="seller-stat-card">
+                    <p className="seller-stat-value">{l.rating}★</p>
+                    <p className="seller-stat-label">Rating</p>
+                  </div>
+                </div>
+
+                <div style={{ borderRadius: "0.75rem", border: "1px solid #E4E4E7", background: "#FAFAFA", padding: "1rem", textAlign: "center", marginTop: "1.25rem" }}>
+                  <p style={{ fontSize: "0.875rem", fontWeight: 500, color: "#18181B" }}>Reviews</p>
+                  <p style={{ marginTop: "0.25rem", fontSize: "0.75rem", color: "#A1A1AA" }}>
+                    Reviews not collected yet — coming in a future update.
                   </p>
-                  <p className="mt-1 text-xs text-[#71717A]">Active Listings</p>
                 </div>
-                <div className="rounded-xl border border-[#F4F4F5] bg-[#FAFAFA] p-4 text-center">
-                  <p className="text-xl font-bold text-[#18181B]">{l.rating}★</p>
-                  <p className="mt-1 text-xs text-[#71717A]">Rating</p>
-                </div>
-              </div>
+              </>
+            )}
 
-              <div className="rounded-xl border border-[#E4E4E7] bg-[#FAFAFA] p-4 text-center">
-                <p className="text-sm font-medium text-[#18181B]">Reviews</p>
-                <p className="mt-1 text-xs text-[#A1A1AA]">
-                  Reviews not collected yet — coming in a future update.
+            {tab === "similar" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <p style={{ fontSize: "0.875rem", color: "#52525B" }}>
+                  Other{" "}
+                  <span style={{ fontWeight: 500, color: "#18181B" }}>{l.subject}</span>{" "}
+                  resources available
                 </p>
+                {similar === null ? (
+                  <>
+                    <Skeleton style={{ height: "3.5rem", borderRadius: "0.75rem" }} />
+                    <Skeleton style={{ height: "3.5rem", borderRadius: "0.75rem" }} />
+                    <Skeleton style={{ height: "3.5rem", borderRadius: "0.75rem" }} />
+                  </>
+                ) : similar.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "2rem 0" }}>
+                    <BookOpen size={24} color="#D4D4D8" style={{ margin: "0 auto 0.5rem" }} />
+                    <p style={{ fontSize: "0.875rem", color: "#71717A" }}>
+                      No other {l.subject} listings yet.
+                    </p>
+                  </div>
+                ) : (
+                  similar.map((s) => (
+                    <div key={s._id} className="similar-item">
+                      <span className="similar-image">{s.image}</span>
+                      <div className="similar-info">
+                        <p className="similar-title">{s.title}</p>
+                        <p className="similar-meta">{s.condition} · {s.city}</p>
+                      </div>
+                      <span className="similar-price">
+                        {s.price === 0 ? "Free" : `₹${s.price}`}
+                      </span>
+                      <ChevronRight size={16} className="similar-chevron" />
+                    </div>
+                  ))
+                )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {tab === "similar" && (
-            <div className="space-y-3">
-              <p className="text-sm text-[#52525B]">
-                Other{" "}
-                <span className="font-medium text-[#18181B]">{l.subject}</span>{" "}
-                resources available
+          {/* Footer */}
+          <div className="resource-modal-footer">
+            {requestError && (
+              <p style={{ marginBottom: "0.75rem", fontSize: "0.875rem", color: "#E11D48" }}>
+                {requestError}
               </p>
-              {similar === null ? (
-                <>
-                  <Skeleton className="h-14 rounded-xl" />
-                  <Skeleton className="h-14 rounded-xl" />
-                  <Skeleton className="h-14 rounded-xl" />
-                </>
-              ) : similar.length === 0 ? (
-                <div className="py-8 text-center">
-                  <BookOpen size={24} className="mx-auto mb-2 text-[#D4D4D8]" />
-                  <p className="text-sm text-[#71717A]">
-                    No other {l.subject} listings yet.
-                  </p>
+            )}
+            <div className="action-buttons">
+              {requested ? (
+                <div style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  borderRadius: "0.75rem",
+                  border: "1px solid #A7F3D0",
+                  background: "#ECFDF5",
+                  padding: "0.75rem",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  color: "#047857"
+                }}>
+                  <CheckCircle size={18} />
+                  Request Saved
                 </div>
               ) : (
-                similar.map((s) => (
-                  <div
-                    key={s._id}
-                    className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#E4E4E7] bg-white p-3 transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
-                  >
-                    <span className="text-2xl">{s.image}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-[#18181B]">{s.title}</p>
-                      <p className="text-xs text-[#71717A]">{s.condition} · {s.city}</p>
-                    </div>
-                    <span className="flex-shrink-0 text-sm font-bold text-[#18181B]">
-                      {s.price === 0 ? "Free" : `₹${s.price}`}
-                    </span>
-                    <ChevronRight size={16} className="text-[#D4D4D8]" />
-                  </div>
-                ))
+                <button
+                  onClick={sendRequest}
+                  disabled={requesting}
+                  className="request-btn"
+                  style={{ flex: 1 }}
+                >
+                  {requesting ? (
+                    <>
+                      <div className="spinner" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      <Send size={18} />
+                      Request Resource
+                    </>
+                  )}
+                </button>
               )}
-            </div>
-          )}
-        </div>
-
-        {/* ── Footer actions ──────────────────────────────── */}
-        <div className="flex-shrink-0 border-t border-[#E4E4E7] p-6 pt-4">
-          {requestError && (
-            <p className="mb-3 text-sm text-rose-600">{requestError}</p>
-          )}
-          <div className="flex gap-2">
-            {requested ? (
-              <div className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 py-3 text-sm font-semibold text-emerald-700">
-                <CheckCircle size={18} />
-                Request Saved
-              </div>
-            ) : (
               <button
-                onClick={sendRequest}
-                disabled={requesting}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#18181B] py-3 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 disabled:opacity-50"
+                onClick={handleSave}
+                disabled={saved || saving}
+                className={`save-btn${saved ? " saved" : ""}`}
+                aria-label={saved ? "Saved" : "Save listing"}
               >
-                {requesting ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Sending…
-                  </>
+                {saving ? (
+                  <div className="spinner" style={{ borderColor: "rgba(0,0,0,0.2)", borderTopColor: "#18181B" }} />
                 ) : (
-                  <>
-                    <Send size={18} />
-                    Request Resource
-                  </>
+                  <Heart
+                    size={20}
+                    fill={saved ? "#E11D48" : "none"}
+                    strokeWidth={saved ? 0 : 2}
+                  />
                 )}
               </button>
-            )}
-            <button
-              onClick={handleSave}
-              disabled={saved || saving}
-              className={`flex aspect-square h-12 items-center justify-center rounded-xl border transition focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2 ${
-                saved
-                  ? "border-rose-200 bg-rose-50 text-rose-600"
-                  : "border-[#E4E4E7] bg-white text-[#A1A1AA] hover:border-[#18181B] hover:text-[#18181B]"
-              }`}
-            >
-              {saving ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#A1A1AA] border-t-[#18181B]" />
-              ) : (
-                <Heart
-                  size={20}
-                  fill={saved ? "#e11d48" : "none"}
-                  strokeWidth={saved ? 0 : 2}
-                />
-              )}
-            </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

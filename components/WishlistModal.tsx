@@ -54,199 +54,446 @@ export default function WishlistModal({ onClose, onCreated }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#18181B]/40 p-4 backdrop-blur-sm sm:items-center">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-        {/* Header */}
-        <div className="flex items-start justify-between border-b border-[#E4E4E7] p-5 sm:p-6">
-          <div className="pr-4">
-            <div className="flex items-center gap-2">
-              <Bookmark size={20} className="text-[#18181B]" />
-              <h2 className="text-lg font-bold text-[#18181B] sm:text-xl">
-                Request a Resource
-              </h2>
+    <>
+      <style>{`
+        /* ── Overlay ────────────────────────── */
+        .wishlist-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 50;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          background: rgba(24,24,27,0.4);
+          backdrop-filter: blur(4px);
+          padding: 1rem;
+        }
+        /* ── Card ───────────────────────────── */
+        .wishlist-card {
+          width: 100%;
+          max-width: 28rem;
+          border-radius: 1.25rem;
+          background: white;
+          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+        /* ── Header ─────────────────────────── */
+        .wishlist-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          border-bottom: 1px solid #E4E4E7;
+          padding: 1.25rem;
+        }
+        .wishlist-header .header-content {
+          padding-right: 1rem;
+        }
+        .wishlist-header .header-icon {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .wishlist-header .header-icon svg {
+          color: #18181B;
+        }
+        .wishlist-header .header-title {
+          font-size: 1.125rem;
+          font-weight: 700;
+          color: #18181B;
+        }
+        .wishlist-header .header-subtitle {
+          margin-top: 0.125rem;
+          font-size: 0.75rem;
+          color: #71717A;
+        }
+        .close-btn {
+          border-radius: 0.5rem;
+          padding: 0.375rem;
+          background: transparent;
+          border: none;
+          color: #A1A1AA;
+          cursor: pointer;
+          transition: background 0.2s, color 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .close-btn:hover {
+          background: #F4F4F5;
+          color: #18181B;
+        }
+        /* ── Body ───────────────────────────── */
+        .wishlist-body {
+          padding: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+        .wishlist-body .error-banner {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          border-radius: 0.5rem;
+          border: 1px solid #FECACA;
+          background: #FFF1F2;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+          color: #E11D48;
+        }
+        /* ── Input fields ───────────────────── */
+        .input-group label {
+          display: block;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #A1A1AA;
+          margin-bottom: 0.25rem;
+        }
+        .input-group input {
+          width: 100%;
+          border-radius: 0.5rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 0.625rem 0.75rem;
+          font-size: 0.875rem;
+          color: #18181B;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-group input::placeholder {
+          color: #A1A1AA;
+        }
+        .input-group input:focus {
+          border-color: #18181B;
+          box-shadow: 0 0 0 2px rgba(24,24,27,0.1);
+        }
+        /* ── Form grid ──────────────────────── */
+        .form-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+        .form-2col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+        /* ── Buttons ────────────────────────── */
+        .btn-primary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          border-radius: 0.75rem;
+          background: #18181B;
+          border: none;
+          padding: 0.75rem;
+          width: 100%;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: white;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .btn-primary:hover {
+          background: #27272A;
+        }
+        .btn-primary:focus {
+          outline: 2px solid #18181B;
+          outline-offset: 2px;
+        }
+        .btn-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 0.75rem;
+          width: 100%;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #18181B;
+          cursor: pointer;
+          transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-secondary:hover {
+          background: #FAFAFA;
+          border-color: #18181B;
+        }
+        .btn-emerald {
+          background: #059669;
+          color: white;
+        }
+        .btn-emerald:hover {
+          background: #047857;
+        }
+        /* ── Searching animation ────────────── */
+        .searching-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1.5rem;
+          padding: 2.5rem 0;
+        }
+        .spinner {
+          width: 3rem;
+          height: 3rem;
+          border-radius: 50%;
+          border: 3px solid #E4E4E7;
+          border-top-color: #18181B;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .searching-text {
+          text-align: center;
+        }
+        .searching-text .primary {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #18181B;
+        }
+        .searching-text .secondary {
+          font-size: 0.75rem;
+          color: #71717A;
+        }
+        /* ── Match result card ──────────────── */
+        .match-banner {
+          border-radius: 0.75rem;
+          border: 1px solid #A7F3D0;
+          background: rgba(236,253,245,0.5);
+          padding: 1.25rem;
+          text-align: center;
+        }
+        .match-banner .icon {
+          margin: 0 auto 0.75rem;
+        }
+        .match-banner h3 {
+          font-size: 1.125rem;
+          font-weight: 700;
+        }
+        .match-banner p {
+          margin-top: 0.25rem;
+          font-size: 0.875rem;
+        }
+        .match-card {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 1rem;
+        }
+        .match-card .info {
+          min-width: 0;
+          flex: 1;
+        }
+        .match-card .info .name {
+          font-weight: 600;
+          color: #18181B;
+        }
+        .match-card .info .title {
+          font-size: 0.875rem;
+          color: #52525B;
+        }
+        .match-card .info .distance {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          margin-top: 0.25rem;
+          font-size: 0.75rem;
+          color: #047857;
+        }
+        .potential-banner, .searching-banner {
+          border-radius: 0.75rem;
+          border: 1px solid;
+          padding: 1.25rem;
+          text-align: center;
+        }
+        .potential-banner {
+          border-color: #FCD34D;
+          background: rgba(255,251,235,0.5);
+        }
+        .searching-banner {
+          border-color: #BFDBFE;
+          background: rgba(239,246,255,0.5);
+        }
+        /* ── Responsive ──────────────────────── */
+        @media (min-width: 640px) {
+          .wishlist-overlay {
+            align-items: center;
+            padding: 1.5rem;
+          }
+          .wishlist-card {
+            border-radius: 1.5rem;
+          }
+          .wishlist-header {
+            padding: 1.5rem;
+          }
+          .wishlist-body {
+            padding: 1.5rem;
+          }
+          .wishlist-header .header-title {
+            font-size: 1.25rem;
+          }
+        }
+      `}</style>
+
+      <div className="wishlist-overlay">
+        <div className="wishlist-card">
+          {/* Header */}
+          <div className="wishlist-header">
+            <div className="header-content">
+              <div className="header-icon">
+                <Bookmark size={20} />
+                <h2 className="header-title">Request a Resource</h2>
+              </div>
+              <p className="header-subtitle">
+                We'll match you with nearby students who have what you need.
+              </p>
             </div>
-            <p className="mt-0.5 text-xs text-[#71717A]">
-              We&apos;ll match you with nearby students who have what you need.
-            </p>
+            <button onClick={onClose} className="close-btn" aria-label="Close">
+              <X size={20} />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-[#A1A1AA] transition hover:bg-[#F4F4F5] hover:text-[#18181B]"
-          >
-            <X size={20} />
-          </button>
-        </div>
 
-        {/* Content – increased gaps and padding */}
-        <div className="space-y-6 p-5 sm:p-6">
-          {stage === "form" && (
-            <div className="space-y-5">
-              <div className="space-y-4">
-                <InputField
-                  label="Resource Name"
-                  value={form.title}
-                  onChange={(v) => updateField("title", v)}
-                  placeholder="e.g. Physical Chemistry by O.P. Tandon"
-                />
-                <InputField
-                  label="Subject"
-                  value={form.subject}
-                  onChange={(v) => updateField("subject", v)}
-                  placeholder="e.g. Chemistry"
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <InputField
-                    label="Curriculum / Exam"
-                    value={form.curriculum}
-                    onChange={(v) => updateField("curriculum", v)}
-                    placeholder="CBSE, NEET…"
-                  />
-                  <InputField
-                    label="Grade / Year"
-                    value={form.grade}
-                    onChange={(v) => updateField("grade", v)}
-                    placeholder="Class 12"
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-600">
-                  <AlertCircle size={16} />
-                  {error}
-                </div>
-              )}
-
-              <button
-                onClick={submit}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#18181B] py-3 text-sm font-medium text-white transition hover:bg-[#27272A] focus:outline-none focus:ring-2 focus:ring-[#18181B] focus:ring-offset-2"
-              >
-                <Search size={16} />
-                Search Network
-              </button>
-            </div>
-          )}
-
-          {stage === "searching" && (
-            <div className="flex flex-col items-center gap-6 py-10">
-              <div className="relative">
-                <Loader2 size={48} className="animate-spin text-[#18181B]" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Search size={20} className="text-[#18181B]" />
-                </div>
-              </div>
-              <div className="text-center space-y-1">
-                <p className="text-sm font-semibold text-[#18181B]">
-                  Searching for matches…
-                </p>
-                <p className="text-xs text-[#71717A]">
-                  Looking through listings near you
-                </p>
-              </div>
-            </div>
-          )}
-
-          {stage === "match" && result && (
-            <div className="space-y-5">
-              {result.status === "match" && (
-                <>
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 text-center sm:p-6">
-                    <CheckCircle2 size={32} className="mx-auto mb-3 text-emerald-600" />
-                    <h3 className="text-lg font-bold text-emerald-700">Match Found!</h3>
-                    <p className="mt-1 text-sm text-emerald-700/80">
-                      A student nearby has the exact resource you need.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4 rounded-xl border border-[#E4E4E7] bg-white p-4 sm:p-5">
-                    <Avatar
-                      initials={result.matchName?.slice(0, 2).toUpperCase() ?? "ST"}
-                      size="md"
+          {/* Body */}
+          <div className="wishlist-body">
+            {stage === "form" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                <div className="form-grid" style={{ gap: "1rem" }}>
+                  <div className="input-group">
+                    <label>Resource Name</label>
+                    <input
+                      value={form.title}
+                      onChange={(e) => updateField("title", e.target.value)}
+                      placeholder="e.g. Physical Chemistry by O.P. Tandon"
                     />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-[#18181B]">{result.matchName}</p>
-                      <p className="text-sm text-[#52525B]">{result.title}</p>
-                      <div className="mt-1 flex items-center gap-1 text-xs text-emerald-700">
-                        <MapPin size={12} />
-                        {result.matchDistance} away
-                      </div>
+                  </div>
+                  <div className="input-group">
+                    <label>Subject</label>
+                    <input
+                      value={form.subject}
+                      onChange={(e) => updateField("subject", e.target.value)}
+                      placeholder="e.g. Chemistry"
+                    />
+                  </div>
+                  <div className="form-2col">
+                    <div className="input-group">
+                      <label>Curriculum / Exam</label>
+                      <input
+                        value={form.curriculum}
+                        onChange={(e) => updateField("curriculum", e.target.value)}
+                        placeholder="CBSE, NEET…"
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label>Grade / Year</label>
+                      <input
+                        value={form.grade}
+                        onChange={(e) => updateField("grade", e.target.value)}
+                        placeholder="Class 12"
+                      />
                     </div>
                   </div>
-                  <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-medium text-white transition hover:bg-emerald-700">
-                    Contact Seller
-                    <ArrowRight size={16} />
-                  </button>
-                </>
-              )}
-
-              {result.status === "potential" && (
-                <div className="space-y-5">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5 text-center sm:p-6">
-                    <Sparkles size={32} className="mx-auto mb-3 text-amber-600" />
-                    <h3 className="text-lg font-bold text-amber-700">
-                      {result.matchCount} Potential Match{result.matchCount !== 1 && "es"}
-                    </h3>
-                    <p className="mt-1 text-sm text-amber-700/80">
-                      We found listings that might work — added to your wishlist.
-                    </p>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white py-3 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
-                  >
-                    View in Wishlist
-                    <ArrowRight size={16} />
-                  </button>
                 </div>
-              )}
 
-              {result.status === "searching" && (
-                <div className="space-y-5">
-                  <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-5 text-center sm:p-6">
-                    <Search size={32} className="mx-auto mb-3 text-blue-600" />
-                    <h3 className="text-lg font-bold text-blue-700">Added to Wishlist</h3>
-                    <p className="mt-1 text-sm text-blue-700/80">
-                      No matches yet — we&apos;ll notify you when one appears.
-                    </p>
+                {error && (
+                  <div className="error-banner">
+                    <AlertCircle size={16} />
+                    {error}
                   </div>
-                  <button
-                    onClick={onClose}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4E4E7] bg-white py-3 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
-                  >
-                    Got It
-                  </button>
+                )}
+
+                <button onClick={submit} className="btn-primary">
+                  <Search size={16} />
+                  Search Network
+                </button>
+              </div>
+            )}
+
+            {stage === "searching" && (
+              <div className="searching-container">
+                <div className="spinner" />
+                <div className="searching-text">
+                  <p className="primary">Searching for matches…</p>
+                  <p className="secondary">Looking through listings near you</p>
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+
+            {stage === "match" && result && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                {result.status === "match" && (
+                  <>
+                    <div className="match-banner" style={{ borderColor: "#A7F3D0", background: "rgba(236,253,245,0.5)" }}>
+                      <div className="icon">
+                        <CheckCircle2 size={32} color="#059669" />
+                      </div>
+                      <h3 style={{ color: "#065F46" }}>Match Found!</h3>
+                      <p style={{ color: "#047857" }}>A student nearby has the exact resource you need.</p>
+                    </div>
+                    <div className="match-card">
+                      <Avatar
+                        initials={result.matchName?.slice(0, 2).toUpperCase() ?? "ST"}
+                        size="md"
+                      />
+                      <div className="info">
+                        <p className="name">{result.matchName}</p>
+                        <p className="title">{result.title}</p>
+                        <div className="distance">
+                          <MapPin size={12} />
+                          {result.matchDistance} away
+                        </div>
+                      </div>
+                    </div>
+                    <button className="btn-primary btn-emerald">
+                      Contact Seller
+                      <ArrowRight size={16} />
+                    </button>
+                  </>
+                )}
+
+                {result.status === "potential" && (
+                  <>
+                    <div className="potential-banner">
+                      <Sparkles size={32} color="#D97706" style={{ margin: "0 auto 0.75rem" }} />
+                      <h3 style={{ fontSize: "1.125rem", fontWeight: 700, color: "#92400E" }}>
+                        {result.matchCount} Potential Match{result.matchCount !== 1 && "es"}
+                      </h3>
+                      <p style={{ color: "#92400E" }}>We found listings that might work — added to your wishlist.</p>
+                    </div>
+                    <button onClick={onClose} className="btn-secondary">
+                      View in Wishlist
+                      <ArrowRight size={16} />
+                    </button>
+                  </>
+                )}
+
+                {result.status === "searching" && (
+                  <>
+                    <div className="searching-banner">
+                      <Search size={32} color="#2563EB" style={{ margin: "0 auto 0.75rem" }} />
+                      <h3 style={{ fontSize: "1.125rem", fontWeight: 700, color: "#1E40AF" }}>Added to Wishlist</h3>
+                      <p style={{ color: "#1E40AF" }}>No matches yet — we'll notify you when one appears.</p>
+                    </div>
+                    <button onClick={onClose} className="btn-secondary">
+                      Got It
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-// Tiny reusable input — untouched
-function InputField({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-        {label}
-      </label>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-[#E4E4E7] bg-white px-3 py-2 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
-      />
-    </div>
+    </>
   );
 }

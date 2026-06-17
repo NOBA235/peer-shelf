@@ -28,7 +28,7 @@ export default function ScannerModal({ onClose, onList }: Props) {
   const [error, setError] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
-  // Editable listing fields
+  // Editable fields
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [subject, setSubject] = useState("");
@@ -131,338 +131,555 @@ export default function ScannerModal({ onClose, onList }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#18181B]/40 p-4 backdrop-blur-sm sm:items-center">
-      <div className="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        {/* ── Header ──────────────────────────────────── */}
-        <div className="flex flex-shrink-0 items-start justify-between border-b border-[#E4E4E7] p-5">
-          <div>
-            <div className="flex items-center gap-2">
-              <Camera size={20} className="text-[#18181B]" />
-              <h2 className="text-lg font-bold text-[#18181B] sm:text-xl">
-                Scan a Book
-              </h2>
+    <>
+      {/* Scoped responsive styles */}
+      <style>{`
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 50;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          background-color: rgba(24, 24, 27, 0.4);
+          backdrop-filter: blur(4px);
+          padding: 1rem;
+        }
+        .modal-card {
+          width: 100%;
+          max-width: 28rem;
+          max-height: 92vh;
+          display: flex;
+          flex-direction: column;
+          border-radius: 1rem;
+          background-color: white;
+          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+          overflow: hidden;
+        }
+        .modal-header {
+          display: flex;
+          flex-shrink: 0;
+          align-items: flex-start;
+          justify-content: space-between;
+          border-bottom: 1px solid #E4E4E7;
+          padding: 1.25rem 1.25rem 1rem;
+        }
+        .modal-body {
+          flex: 1;
+          overflow-y: auto;
+          padding: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+        .modal-body::-webkit-scrollbar {
+          width: 4px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+          background: #D4D4D8;
+          border-radius: 2px;
+        }
+        .input-field {
+          width: 100%;
+          border-radius: 0.5rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 0.625rem 0.75rem;
+          font-size: 0.875rem;
+          color: #18181B;
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-field:focus {
+          border-color: #18181B;
+          box-shadow: 0 0 0 2px rgba(24,24,27,0.1);
+        }
+        .input-field::placeholder {
+          color: #A1A1AA;
+        }
+        .btn-primary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          border-radius: 0.75rem;
+          background: #18181B;
+          color: white;
+          border: none;
+          font-size: 0.875rem;
+          font-weight: 500;
+          padding: 0.625rem 1rem;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .btn-primary:hover {
+          background: #27272A;
+        }
+        .btn-primary:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .btn-secondary {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 0.625rem 1rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #18181B;
+          cursor: pointer;
+          transition: background 0.2s, border-color 0.2s;
+        }
+        .btn-secondary:hover {
+          background: #FAFAFA;
+          border-color: #18181B;
+        }
+        @media (min-width: 640px) {
+          .modal-overlay {
+            align-items: center;
+            padding: 1.5rem;
+          }
+          .modal-card {
+            border-radius: 1.25rem;
+          }
+          .modal-header {
+            padding: 1.5rem 1.5rem 1.25rem;
+          }
+          .modal-body {
+            padding: 1.5rem;
+            gap: 1.5rem;
+          }
+        }
+      `}</style>
+
+      <div className="modal-overlay">
+        <div className="modal-card">
+          {/* Header */}
+          <div className="modal-header">
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <Camera size={20} color="#18181B" />
+                <h2 style={{ fontSize: "1.125rem", fontWeight: 700, color: "#18181B" }}>
+                  Scan a Book
+                </h2>
+              </div>
+              <p style={{ marginTop: "0.125rem", fontSize: "0.75rem", color: "#71717A" }}>
+                {stage === "idle" && "Point at a textbook cover or barcode"}
+                {stage === "scanning" && "Extracting text and metadata…"}
+                {stage === "result" &&
+                  (result?.isbn
+                    ? "ISBN detected — review the details"
+                    : "No ISBN found — please verify")}
+                {stage === "error" && "Scan failed"}
+                {stage === "listing" && "Publishing your listing…"}
+                {stage === "done" && "Listing published"}
+              </p>
             </div>
-            <p className="mt-0.5 text-xs text-[#71717A]">
-              {stage === "idle" && "Point at a textbook cover or barcode"}
-              {stage === "scanning" && "Extracting text and metadata…"}
-              {stage === "result" &&
-                (result?.isbn
-                  ? "ISBN detected — review the details"
-                  : "No ISBN found — please verify")}
-              {stage === "error" && "Scan failed"}
-              {stage === "listing" && "Publishing your listing…"}
-              {stage === "done" && "Listing published"}
-            </p>
+            <button
+              onClick={onClose}
+              style={{
+                borderRadius: "0.5rem",
+                padding: "0.375rem",
+                color: "#A1A1AA",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                transition: "background 0.2s, color 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#F4F4F5";
+                e.currentTarget.style.color = "#18181B";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#A1A1AA";
+              }}
+            >
+              <X size={20} />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-[#A1A1AA] transition hover:bg-[#F4F4F5] hover:text-[#18181B]"
-          >
-            <X size={20} />
-          </button>
-        </div>
 
-        {/* ── Content ──────────────────────────────────── */}
-        <div className="flex-1 space-y-5 overflow-y-auto p-5">
-          {/* Idle state — file picker */}
-          {stage === "idle" && (
-            <div className="space-y-5">
-              <input
-                ref={fileInput}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={onFilePicked}
-                className="hidden"
-              />
-              <button
-                onClick={() => fileInput.current?.click()}
-                className="flex w-full flex-col items-center gap-4 rounded-xl border-2 border-dashed border-[#D4D4D8] p-10 text-center transition hover:border-[#18181B] hover:bg-[#FAFAFA]"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F4F4F5]">
-                  <Upload size={24} className="text-[#52525B]" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#18181B]">
-                    Take or upload a photo
-                  </p>
-                  <p className="mt-1 text-sm text-[#71717A]">
-                    Cover or ISBN barcode works best
-                  </p>
-                </div>
-              </button>
-              <div className="rounded-xl border border-[#E4E4E7] bg-[#FAFAFA] p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                  How it works
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-[#52525B]">
-                  Your photo is processed by OCR to detect text and ISBN. We
-                  then fetch real book metadata so you don&apos;t have to type it
-                  all. You can edit everything before publishing.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Scanning state */}
-          {stage === "scanning" && (
-            <div className="space-y-5">
-              {preview && (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="h-40 w-full rounded-xl border border-[#E4E4E7] object-cover"
+          {/* Body */}
+          <div className="modal-body">
+            {/* Idle state */}
+            {stage === "idle" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={onFilePicked}
+                  style={{ display: "none" }}
                 />
-              )}
-              <div className="flex flex-col items-center gap-4 py-4">
-                <Loader2
-                  size={40}
-                  className="animate-spin text-[#18181B]"
-                />
-                <p className="text-sm font-medium text-[#52525B]">
-                  Scanning with OCR…
-                </p>
-                <div className="flex items-center gap-2 text-xs text-[#71717A]">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#18181B]" />
-                  This takes a few seconds
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Error state */}
-          {stage === "error" && (
-            <div className="space-y-4">
-              {preview && (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="h-32 w-full rounded-xl border border-[#E4E4E7] object-cover opacity-60"
-                />
-              )}
-              <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4">
-                <AlertCircle size={20} className="mt-0.5 text-rose-600" />
-                <div>
-                  <p className="text-sm font-semibold text-rose-700">
-                    Scan failed
-                  </p>
-                  <p className="mt-1 text-sm text-rose-600">{error}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
                 <button
-                  onClick={reset}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#18181B] py-2.5 text-sm font-medium text-white transition hover:bg-[#27272A]"
-                >
-                  <RotateCcw size={16} />
-                  Try Again
-                </button>
-                <button
-                  onClick={() => {
-                    setStage("result");
-                    setError("");
+                  onClick={() => fileInput.current?.click()}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "1rem",
+                    borderRadius: "0.75rem",
+                    border: "2px dashed #D4D4D8",
+                    padding: "2.5rem 1rem",
+                    textAlign: "center",
+                    background: "white",
+                    cursor: "pointer",
+                    transition: "border-color 0.2s, background 0.2s",
                   }}
-                  className="flex items-center gap-2 rounded-xl border border-[#E4E4E7] bg-white px-4 py-2.5 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "#18181B";
+                    e.currentTarget.style.background = "#FAFAFA";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#D4D4D8";
+                    e.currentTarget.style.background = "white";
+                  }}
                 >
-                  Enter Manually
+                  <div
+                    style={{
+                      width: "3.5rem",
+                      height: "3.5rem",
+                      borderRadius: "50%",
+                      background: "#F4F4F5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Upload size={24} color="#52525B" />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "#18181B" }}>
+                      Take or upload a photo
+                    </p>
+                    <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: "#71717A" }}>
+                      Cover or ISBN barcode works best
+                    </p>
+                  </div>
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* Result / edit form */}
-          {(stage === "result" || stage === "listing") && (
-            <div className="space-y-4">
-              {preview && (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="h-32 w-full rounded-xl border border-[#E4E4E7] object-cover"
-                />
-              )}
-
-              {result && (
                 <div
-                  className={`rounded-xl border p-4 ${
-                    result.isbn
-                      ? "border-emerald-200 bg-emerald-50/50"
-                      : "border-amber-200 bg-amber-50/50"
-                  }`}
+                  style={{
+                    borderRadius: "0.75rem",
+                    border: "1px solid #E4E4E7",
+                    background: "#FAFAFA",
+                    padding: "1rem",
+                  }}
                 >
-                  <div className="flex items-start gap-2">
+                  <p style={{ fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#A1A1AA" }}>
+                    How it works
+                  </p>
+                  <p style={{ marginTop: "0.25rem", fontSize: "0.75rem", lineHeight: 1.5, color: "#52525B" }}>
+                    Your photo is processed by OCR to detect text and ISBN. We
+                    then fetch real book metadata so you don&apos;t have to type it
+                    all. You can edit everything before publishing.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Scanning state */}
+            {stage === "scanning" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                {preview && (
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    style={{
+                      height: "10rem",
+                      width: "100%",
+                      borderRadius: "0.75rem",
+                      border: "1px solid #E4E4E7",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", padding: "1rem 0" }}>
+                  <Loader2 size={40} className="animate-spin" color="#18181B" />
+                  <p style={{ fontSize: "0.875rem", fontWeight: 500, color: "#52525B" }}>
+                    Scanning with OCR…
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.75rem", color: "#71717A" }}>
+                    <span style={{ width: "0.375rem", height: "0.375rem", borderRadius: "50%", background: "#18181B", animation: "pulse 1s infinite" }} />
+                    This takes a few seconds
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Error state */}
+            {stage === "error" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {preview && (
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    style={{
+                      height: "8rem",
+                      width: "100%",
+                      borderRadius: "0.75rem",
+                      border: "1px solid #E4E4E7",
+                      objectFit: "cover",
+                      opacity: 0.6,
+                    }}
+                  />
+                )}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "0.75rem",
+                    borderRadius: "0.75rem",
+                    border: "1px solid #FECACA",
+                    background: "#FFF1F2",
+                    padding: "1rem",
+                  }}
+                >
+                  <AlertCircle size={20} color="#E11D48" style={{ marginTop: "0.125rem" }} />
+                  <div>
+                    <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "#BE123C" }}>
+                      Scan failed
+                    </p>
+                    <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: "#E11D48" }}>
+                      {error}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button onClick={reset} className="btn-primary" style={{ flex: 1 }}>
+                    <RotateCcw size={16} />
+                    Try Again
+                  </button>
+                  <button
+                    onClick={() => {
+                      setStage("result");
+                      setError("");
+                    }}
+                    className="btn-secondary"
+                  >
+                    Enter Manually
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Result / listing form */}
+            {(stage === "result" || stage === "listing") && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {preview && (
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    style={{
+                      height: "8rem",
+                      width: "100%",
+                      borderRadius: "0.75rem",
+                      border: "1px solid #E4E4E7",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+
+                {result && (
+                  <div
+                    style={{
+                      borderRadius: "0.75rem",
+                      border: `1px solid ${result.isbn ? "#A7F3D0" : "#FCD34D"}`,
+                      background: result.isbn ? "rgba(236,253,245,0.5)" : "rgba(255,251,235,0.5)",
+                      padding: "1rem",
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "0.5rem",
+                    }}
+                  >
                     {result.isbn ? (
-                      <CheckCircle2
-                        size={18}
-                        className="mt-0.5 text-emerald-600"
-                      />
+                      <CheckCircle2 size={18} color="#059669" style={{ marginTop: "0.125rem" }} />
                     ) : (
-                      <AlertCircle
-                        size={18}
-                        className="mt-0.5 text-amber-600"
-                      />
+                      <AlertCircle size={18} color="#D97706" style={{ marginTop: "0.125rem" }} />
                     )}
                     <div>
-                      {result.isbn ? (
-                        <p className="text-sm font-medium text-emerald-700">
-                          ISBN {result.isbn} detected — metadata verified
-                        </p>
-                      ) : (
-                        <p className="text-sm font-medium text-amber-700">
-                          No ISBN found — please verify details below
-                        </p>
-                      )}
+                      <p style={{ fontSize: "0.875rem", fontWeight: 500, color: result.isbn ? "#065F46" : "#92400E" }}>
+                        {result.isbn
+                          ? `ISBN ${result.isbn} detected — metadata verified`
+                          : "No ISBN found — please verify details below"}
+                      </p>
                       {result.subjects.length > 0 && (
-                        <p className="mt-1 text-xs text-[#52525B]">
+                        <p style={{ marginTop: "0.25rem", fontSize: "0.75rem", color: "#52525B" }}>
                           Subjects: {result.subjects.join(", ")}
                         </p>
                       )}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {error && (
-                <div className="flex items-center gap-2 text-sm text-rose-600">
-                  <AlertCircle size={16} />
-                  {error}
-                </div>
-              )}
+                {error && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "#E11D48" }}>
+                    <AlertCircle size={16} />
+                    {error}
+                  </div>
+                )}
 
-              {/* Form fields */}
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                    Title
-                  </label>
-                  <input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-[#E4E4E7] bg-white px-3 py-2 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
-                    placeholder="e.g. NCERT Chemistry Part 1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                    Author
-                  </label>
-                  <input
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-[#E4E4E7] bg-white px-3 py-2 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
-                    placeholder="e.g. NCERT"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                      Subject
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#A1A1AA", marginBottom: "0.25rem" }}>
+                      Title
                     </label>
                     <input
-                      value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-[#E4E4E7] bg-white px-3 py-2 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
-                      placeholder="Physics"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="input-field"
+                      placeholder="e.g. NCERT Chemistry Part 1"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                      Price (₹)
-                    </label>
+                    <label style={labelStyle}>Author</label>
                     <input
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-[#E4E4E7] bg-white px-3 py-2 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
-                      inputMode="numeric"
-                      placeholder="0 = free"
+                      value={author}
+                      onChange={(e) => setAuthor(e.target.value)}
+                      className="input-field"
+                      placeholder="e.g. NCERT"
                     />
                   </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                    <div>
+                      <label style={labelStyle}>Subject</label>
+                      <input
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        className="input-field"
+                        placeholder="Physics"
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Price (₹)</label>
+                      <input
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        className="input-field"
+                        inputMode="numeric"
+                        placeholder="0 = free"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ ...labelStyle, marginBottom: "0.5rem" }}>Condition</label>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.5rem" }}>
+                      {["Like New", "Very Good", "Good", "Fair"].map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => setCondition(c)}
+                          style={{
+                            borderRadius: "0.5rem",
+                            padding: "0.5rem 0.25rem",
+                            fontSize: "0.75rem",
+                            fontWeight: 500,
+                            border: condition === c ? "none" : "1px solid #E4E4E7",
+                            background: condition === c ? "#18181B" : "white",
+                            color: condition === c ? "white" : "#18181B",
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (condition !== c) {
+                              e.currentTarget.style.borderColor = "#18181B";
+                              e.currentTarget.style.background = "#FAFAFA";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (condition !== c) {
+                              e.currentTarget.style.borderColor = "#E4E4E7";
+                              e.currentTarget.style.background = "white";
+                            }
+                          }}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Pickup Location</label>
+                    <div style={{ position: "relative", marginTop: "0.25rem" }}>
+                      <MapPin
+                        size={16}
+                        style={{
+                          position: "absolute",
+                          left: "0.75rem",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          color: "#A1A1AA",
+                        }}
+                      />
+                      <input
+                        value={meetup}
+                        onChange={(e) => setMeetup(e.target.value)}
+                        className="input-field"
+                        style={{ paddingLeft: "2.25rem" }}
+                        placeholder="e.g. Library entrance"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    onClick={publish}
+                    disabled={stage === "listing" || !title.trim()}
+                    className="btn-primary"
+                    style={{ flex: 1 }}
+                  >
+                    {stage === "listing" ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Publishing…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={16} />
+                        Publish Listing
+                      </>
+                    )}
+                  </button>
+                  <button onClick={reset} className="btn-secondary">
+                    <RotateCcw size={16} />
+                    Rescan
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Done state */}
+            {stage === "done" && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", padding: "2.5rem 0", textAlign: "center" }}>
+                <div style={{ width: "4rem", height: "4rem", borderRadius: "50%", background: "#ECFDF5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <CheckCircle2 size={32} color="#059669" />
                 </div>
                 <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                    Condition
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {["Like New", "Very Good", "Good", "Fair"].map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => setCondition(c)}
-                        className={`rounded-lg px-2 py-2 text-xs font-medium transition ${
-                          condition === c
-                            ? "bg-[#18181B] text-white"
-                            : "border border-[#E4E4E7] bg-white text-[#18181B] hover:border-[#18181B] hover:bg-[#FAFAFA]"
-                        }`}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-                    Pickup Location
-                  </label>
-                  <div className="relative mt-1">
-                    <MapPin
-                      size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA]"
-                    />
-                    <input
-                      value={meetup}
-                      onChange={(e) => setMeetup(e.target.value)}
-                      className="w-full rounded-lg border border-[#E4E4E7] bg-white py-2 pl-9 pr-3 text-sm text-[#18181B] placeholder:text-[#A1A1AA] focus:border-[#18181B] focus:outline-none focus:ring-2 focus:ring-[#18181B]/10"
-                      placeholder="e.g. Library entrance"
-                    />
-                  </div>
+                  <p style={{ fontSize: "1.25rem", fontWeight: 700, color: "#18181B" }}>
+                    Listing Published
+                  </p>
+                  <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: "#52525B" }}>
+                    Your book is now visible in the marketplace.
+                  </p>
                 </div>
               </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={publish}
-                  disabled={stage === "listing" || !title.trim()}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#18181B] py-2.5 text-sm font-medium text-white transition hover:bg-[#27272A] disabled:opacity-50"
-                >
-                  {stage === "listing" ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      Publishing…
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={16} />
-                      Publish Listing
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={reset}
-                  className="flex items-center gap-2 rounded-xl border border-[#E4E4E7] bg-white px-4 py-2.5 text-sm font-medium text-[#18181B] transition hover:bg-[#FAFAFA]"
-                >
-                  <RotateCcw size={16} />
-                  Rescan
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Done state */}
-          {stage === "done" && (
-            <div className="flex flex-col items-center gap-4 py-10 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-                <CheckCircle2 size={32} className="text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-xl font-bold text-[#18181B]">
-                  Listing Published
-                </p>
-                <p className="mt-1 text-sm text-[#52525B]">
-                  Your book is now visible in the marketplace.
-                </p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "0.75rem",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  color: "#A1A1AA",
+  marginBottom: "0.25rem",
+};
