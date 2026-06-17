@@ -65,178 +65,328 @@ export default function MarketplaceSection({ onListingClick, onRequest }: Props)
   }, [search]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex justify-center">
-      <div className="w-full max-w-5xl px-4 sm:px-6 lg:px-10 py-8 md:py-10 flex flex-col gap-6">
-        {/* ── Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <SectionLabel>Browse</SectionLabel>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Marketplace</h1>
-            <p className="mt-1 text-sm text-zinc-500">
-              {listings.length} resource{listings.length !== 1 ? "s" : ""} available near you
-            </p>
-          </div>
-          <button
-            onClick={onRequest}
-            className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 whitespace-nowrap"
-          >
-            <BookmarkPlus size={16} />
-            Request a Resource
-          </button>
-        </div>
+    <>
+      <style>{`
+        .marketplace-wrapper {
+          min-height: 100vh;
+          background: #FAFAFA;
+          display: flex;
+          justify-content: center;
+        }
+        .marketplace-container {
+          width: 100%;
+          max-width: 64rem;
+          padding: 2rem 1.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+        .marketplace-header {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .search-filter-row {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          align-items: stretch;
+        }
+        .search-input-wrap {
+          position: relative;
+          flex: 1;
+        }
+        .search-input-wrap input {
+          width: 100%;
+          padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+          border-radius: 0.5rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          font-size: 0.875rem;
+          color: #18181B;
+          outline: none;
+          box-sizing: border-box;
+        }
+        .search-input-wrap input::placeholder {
+          color: #A1A1AA;
+        }
+        .filter-btn {
+          display: inline-flex;
+          height: 2.5rem;
+          align-items: center;
+          gap: 0.5rem;
+          border-radius: 0.5rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 0 1rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #52525B;
+          cursor: pointer;
+          transition: background 0.2s, border-color 0.2s;
+          white-space: nowrap;
+        }
+        .filter-btn.active {
+          border-color: #D4D4D8;
+          background: #F4F4F5;
+          color: #18181B;
+        }
+        .chips-row {
+          display: flex;
+          gap: 0.5rem;
+          overflow-x: auto;
+          padding-bottom: 0.25rem;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .chips-row::-webkit-scrollbar {
+          display: none;
+        }
+        .advanced-filters {
+          border-radius: 0.75rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .filter-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+        .filter-grid label {
+          display: block;
+          font-size: 0.75rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #71717A;
+          margin-bottom: 0.375rem;
+        }
+        .filter-grid select {
+          width: 100%;
+          border-radius: 0.5rem;
+          border: 1px solid #E4E4E7;
+          background: white;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+          color: #18181B;
+          outline: none;
+        }
+        .results-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+        @media (min-width: 640px) {
+          .marketplace-container {
+            padding: 2.5rem 1.5rem;
+            gap: 1.75rem;
+          }
+          .marketplace-header {
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+          }
+          .search-filter-row {
+            flex-direction: row;
+            align-items: center;
+          }
+          .filter-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (min-width: 1024px) {
+          .marketplace-container {
+            padding: 3rem 2rem;
+          }
+          .filter-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+          .results-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+          }
+        }
+      `}</style>
 
-        {/* ── Search & filter toggle ── */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search books, notes, formula sheets…"
-              className="w-full rounded-lg border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
-            />
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition focus:outline-none ${
-              showFilters
-                ? "border-zinc-300 bg-zinc-50 text-zinc-900"
-                : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
-            }`}
-          >
-            <SlidersHorizontal size={15} />
-            Filters
-            {activeFilters > 0 && (
-              <span className="text-xs text-zinc-400 ml-0.5">({activeFilters})</span>
-            )}
-          </button>
-        </div>
-
-        {/* ── Subject chips ── */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {SUBJECTS.map((s) => (
-            <Chip
-              key={s}
-              active={subject === s}
-              onClick={() => setSubject(s)}
-              className="whitespace-nowrap"
-            >
-              {s}
-            </Chip>
-          ))}
-        </div>
-
-        {/* ── Advanced filters ── */}
-        {showFilters && (
-          <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm flex flex-col gap-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Type */}
-              <div>
-                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1.5">
-                  Type
-                </label>
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
-                >
-                  {TYPES.map((o) => (
-                    <option key={o} value={o}>{o}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Board */}
-              <div>
-                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1.5">
-                  Board
-                </label>
-                <select
-                  value={board}
-                  onChange={(e) => setBoard(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
-                >
-                  {BOARDS.map((o) => (
-                    <option key={o} value={o}>{o}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* City */}
-              <div>
-                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1.5">
-                  City
-                </label>
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
-                >
-                  {CITIES.map((o) => (
-                    <option key={o} value={o}>{o}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Sort */}
-              <div>
-                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1.5">
-                  Sort By
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/20"
-                >
-                  {[
-                    ["createdAt", "Most Recent"],
-                    ["price-asc", "Price ↑"],
-                    ["price-desc", "Price ↓"],
-                    ["saves", "Most Saved"],
-                  ].map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
-                  ))}
-                </select>
-              </div>
+      <div className="marketplace-wrapper">
+        <div className="marketplace-container">
+          {/* Header */}
+          <div className="marketplace-header">
+            <div>
+              <SectionLabel>Browse</SectionLabel>
+              <h1 style={{ marginTop: "0.25rem", fontSize: "1.5rem", fontWeight: 600, lineHeight: 1.2, color: "#18181B" }}>
+                Marketplace
+              </h1>
+              <p style={{ marginTop: "0.25rem", fontSize: "0.875rem", color: "#71717A" }}>
+                {listings.length} resource{listings.length !== 1 ? "s" : ""} available near you
+              </p>
             </div>
+            <button
+              onClick={onRequest}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                borderRadius: "0.5rem",
+                border: "1px solid #E4E4E7",
+                background: "white",
+                padding: "0.5rem 1rem",
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: "#52525B",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#FAFAFA")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
+            >
+              <BookmarkPlus size={16} />
+              Request a Resource
+            </button>
+          </div>
 
-            {activeFilters > 0 && (
-              <button
-                onClick={() => {
-                  setSubject("All");
-                  setType("All Types");
-                  setBoard("All Boards");
-                  setCity("All Cities");
+          {/* Search & filter toggle */}
+          <div className="search-filter-row">
+            <div className="search-input-wrap">
+              <Search
+                size={16}
+                style={{
+                  position: "absolute",
+                  left: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#A1A1AA",
                 }}
-                className="text-sm font-medium text-zinc-600 underline underline-offset-2 hover:text-zinc-900 self-start"
-              >
-                Clear all filters
-              </button>
-            )}
+              />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search books, notes, formula sheets…"
+              />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`filter-btn${showFilters ? " active" : ""}`}
+            >
+              <SlidersHorizontal size={15} />
+              Filters
+              {activeFilters > 0 && (
+                <span style={{ fontSize: "0.75rem", color: "#A1A1AA", marginLeft: "0.25rem" }}>
+                  ({activeFilters})
+                </span>
+              )}
+            </button>
           </div>
-        )}
 
-        {/* ── Results ── */}
-        {loading ? (
-          <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-32 rounded-xl" />
+          {/* Subject chips */}
+          <div className="chips-row">
+            {SUBJECTS.map((s) => (
+              <Chip
+                key={s}
+                active={subject === s}
+                onClick={() => setSubject(s)}
+                className="whitespace-nowrap"
+              >
+                {s}
+              </Chip>
             ))}
           </div>
-        ) : listings.length === 0 ? (
-          <EmptyState
-            icon={<PackageOpen size={28} className="text-zinc-300" />}
-            title="No resources found"
-            desc="Try adjusting filters or request this resource"
-          />
-        ) : (
-          <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
-            {listings.map((l) => (
-              <ListingCard key={l._id} listing={toListin(l)} onClick={onListingClick} />
-            ))}
-          </div>
-        )}
+
+          {/* Advanced filters */}
+          {showFilters && (
+            <div className="advanced-filters">
+              <div className="filter-grid">
+                <div>
+                  <label>Type</label>
+                  <select value={type} onChange={(e) => setType(e.target.value)}>
+                    {TYPES.map((o) => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label>Board</label>
+                  <select value={board} onChange={(e) => setBoard(e.target.value)}>
+                    {BOARDS.map((o) => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label>City</label>
+                  <select value={city} onChange={(e) => setCity(e.target.value)}>
+                    {CITIES.map((o) => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label>Sort By</label>
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    {[
+                      ["createdAt", "Most Recent"],
+                      ["price-asc", "Price ↑"],
+                      ["price-desc", "Price ↓"],
+                      ["saves", "Most Saved"],
+                    ].map(([v, l]) => (
+                      <option key={v} value={v}>{l}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {activeFilters > 0 && (
+                <button
+                  onClick={() => {
+                    setSubject("All");
+                    setType("All Types");
+                    setBoard("All Boards");
+                    setCity("All Cities");
+                  }}
+                  style={{
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    color: "#52525B",
+                    textDecoration: "underline",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Results */}
+          {loading ? (
+            <div className="results-grid">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} style={{ height: "8rem", borderRadius: "0.75rem" }} />
+              ))}
+            </div>
+          ) : listings.length === 0 ? (
+            <EmptyState
+              icon={<PackageOpen size={28} style={{ color: "#D4D4D8" }} />}
+              title="No resources found"
+              desc="Try adjusting filters or request this resource"
+            />
+          ) : (
+            <div className="results-grid">
+              {listings.map((l) => (
+                <ListingCard key={l._id} listing={toListin(l)} onClick={onListingClick} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
