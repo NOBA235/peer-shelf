@@ -204,9 +204,8 @@ export default function HomeSection({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 py-16 text-[#18181B] sm:px-6 sm:py-28 lg:px-8">
-      {/* Increased vertical padding & section gaps */}
-      <div className="mx-auto max-w-7xl space-y-20 sm:space-y-32 lg:space-y-40">
+  <div className="min-h-screen w-full bg-[#FAFAFA] px-4 py-16 text-[#18181B] sm:px-6 sm:py-28 lg:px-8">
+  <div className="w-full space-y-20 sm:space-y-32 lg:space-y-40">
         <section className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 lg:gap-16">
           {/* Left column */}
           <div className="space-y-5 text-center md:text-left">
@@ -215,7 +214,7 @@ export default function HomeSection({
               {communityImages.map((src, idx) => (
                 <div
                   key={idx}
-                  className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-white bg-gray-100 shadow-sm overflow-hidden"
+                  className="relative h-20 w-20 sm:h-12 sm:w-12 rounded-full border-2 border-white bg-gray-100 shadow-sm overflow-hidden"
                 >
                   <Image
                     src={src}
