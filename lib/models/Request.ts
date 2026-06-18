@@ -7,20 +7,15 @@ export interface IRequest extends Document {
   sellerName: string;
   status: "pending" | "accepted" | "declined";
   createdAt: Date;
-  updatedAt: Date;
 }
 
 const RequestSchema = new Schema<IRequest>(
   {
-    listingId:     { type: Schema.Types.ObjectId, ref: "Listing", required: true, index: true },
+    listingId:     { type: Schema.Types.ObjectId, ref: "Listing", required: true },
     listingTitle:  { type: String, required: true },
-    requesterName: { type: String, required: true, default: "You" },
+    requesterName: { type: String, default: "You" },
     sellerName:    { type: String, required: true },
-    status: {
-      type: String,
-      enum: ["pending", "accepted", "declined"],
-      default: "pending",
-    },
+    status:        { type: String, enum: ["pending","accepted","declined"], default: "pending" },
   },
   { timestamps: true }
 );

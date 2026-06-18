@@ -1,6 +1,10 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IMentor extends Document {
+  userId?: mongoose.Types.ObjectId | string;
+  email?: string;
+  image?: string;
+
   name: string;
   initials: string;
   grade: string;
@@ -20,10 +24,12 @@ export interface IMentor extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-
 const MentorSchema = new Schema<IMentor>(
   {
     name: { type: String, required: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", index: true },
+    email:  { type: String },
+    image:  { type: String },
     initials: { type: String, required: true },
     grade: { type: String, required: true },
     achievement: { type: String, required: true },

@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Listing from "@/lib/models/Listing";
@@ -52,7 +53,14 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const body = await req.json();
-
+    const session = await auth();
+if (session?.user) {
+  const name     = session.user.name ?? "Anonymous";
+  const initials = name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
+  body.seller         = name;
+  body.sellerInitials = initials;
+  body.sellerId       = session.user.id;
+}
     const listing = await Listing.create(body);
     return NextResponse.json({ success: true, data: listing }, { status: 201 });
   } catch (error) {

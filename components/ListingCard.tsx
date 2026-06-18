@@ -4,7 +4,7 @@ import { Listing } from "@/lib/data";
 import { saveListing } from "@/lib/api";
 import { Badge, Avatar, StarRating } from "./ui";
 import { MapPin, Bookmark } from "lucide-react";
-
+import BookCover from "./BookCover";
 const CONDITION_COLOR: Record<string, string> = {
   "Like New": "emerald",
   "Very Good": "blue",
@@ -170,15 +170,12 @@ export default function ListingCard({ listing: l, onClick }: Props) {
         onKeyDown={(e) => e.key === "Enter" && onClick(l)}
       >
         {/* Book icon */}
-        <div
-          className="book-icon"
-          style={{
-            background: l.color + "18",
-            border: `1px solid ${l.color}28`,
-          }}
-        >
-          {l.image}
-        </div>
+        <BookCover
+  title={l.title}
+  fallbackEmoji={l.image}
+  fallbackColor={l.color}
+  className="w-14 h-[72px] sm:w-16 sm:h-20"
+/>
 
         {/* Content */}
         <div className="card-content">
